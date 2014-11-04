@@ -52,7 +52,7 @@ power2 n k | k < 0     = error "power2: negative exponent"
 -- Property that checks that power, power1 and power2 produce equal results.
 -- Negative values for k are avoided by only using the absolute value.
 prop_powers :: Integer -> Integer -> Bool
-prop_powers n k = let k' = abs k in 
+prop_powers n k = let k' = abs k in
                   power2 n k' == power n k' &&
                   power1 n k' == power n k'
 
@@ -61,8 +61,8 @@ prop_powers n k = let k' = abs k in
 
 --  Cartesian product for n X k as mentioned in part A.
 prop_powersAll :: Integer -> Integer -> Bool
-prop_powersAll n k = let ns = [n, 0, (-n)] in
-                     let ks = [0, (abs k), (1 + abs k)] in
+prop_powersAll n k = let ns = [n, 0, -n] in
+                     let ks = [0, abs k, 1 + abs k] in
                      and [prop_powers n' k' | n' <- ns, k' <- ks]
 
 
