@@ -1,6 +1,6 @@
 -- Lab Assignment 1
+
 import Data.List
-import Test.QuickCheck
 
 -- Calculate n^k recursively.
 power :: Integer -> Integer -> Integer
