@@ -21,21 +21,20 @@ hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hear
 empty :: Hand
 empty = Empty
 
--- Uses value' to have a separate sum of the aces, and multiply aces by 11
--- only if the total sum is <= 21.
+-- Calculates the value of a hand taking the rules about aces into account.
 value :: Hand -> Integer
-value h = let (val, aces) = value' h in
-          let bigVal = val + aces * 11 in
-          if bigVal <= 21 then bigVal
-          else val + aces
+value h | highVal <= 21 = highVal
+        | otherwise    = lowVal
+        where (lowVal, aces) = lowValueAndAces h
+              highVal = lowVal + aces * 10
 
--- Sum the values of all cards except aces in the first member of the tuple,
--- Count of aces in the second member of the tuple.
-value' :: Hand ->  (Integer, Integer)
-value' Empty = (0, 0)
-value' (Add (Card Ace _) n) = tupleSum (0, 1) (value' n)
-value' (Add (Card (Numeric num) _) n) = tupleSum (num, 0) (value' n)
-value' (Add _ n) = tupleSum (10, 0) (value' n)
+-- Traverses a hand and returns the value where aces count as 1 and
+-- the amount of aces.
+lowValueAndAces :: Hand ->  (Integer, Integer)
+lowValueAndAces Empty                          = (0, 0)
+lowValueAndAces (Add (Card Ace _) n)           = tupleSum (1, 1)(lowValueAndAces n)
+lowValueAndAces (Add (Card (Numeric num) _) n) = tupleSum (num, 0) (lowValueAndAces n)
+lowValueAndAces (Add _ n)                      = tupleSum (10, 0) (lowValueAndAces n)
 
 -- Function for summing corresponding members of two tuples
 tupleSum:: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
