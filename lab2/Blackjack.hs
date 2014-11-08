@@ -15,6 +15,7 @@ module BlackJack where
 import Cards
 import Wrapper
 
+hand1 = Add (Card Jack Clubs) (Add (Card Ace Hearts) Empty)
 hand2 = Add (Card Jack Spades) (Add (Card King Hearts) Empty)
 hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hearts) Empty))
 
@@ -40,6 +41,25 @@ lowValueAndAces (Add _ n)                      = tupleSum (10, 0) (lowValueAndAc
 tupleSum:: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
 tupleSum (a, b) (a', b') = (a + a', b + b')
 
+valueRank:: Rank -> Integer
+valueRank Ace = 1
+valueRank (Numeric n) = n
+valueRank _ = 10
+
+valueCard:: Card -> Integer
+valueCard (Card r _) = valueRank r
+
+numberOfAces:: Hand -> Integer
+numberOfAces Empty = 0
+numberOfAces (Add (Card Ace _) h) = 1 + numberOfAces h
+numberOfAces (Add _ h) = numberOfAces h
+
+valueAlt:: Hand -> Integer
+valueAlt h | handValue h + (10 * numberOfAces h) > 21 = handValue h
+           | otherwise = handValue h + (10 * numberOfAces h)
+             where handValue Empty = 0
+                   handValue (Add c h') = valueCard c + handValue h'
+
 -- bust means value > 21
 gameOver:: Hand -> Bool
 gameOver h = value h > 21
@@ -47,7 +67,7 @@ gameOver h = value h > 21
 winner :: Hand -> Hand -> Player
 winner playerHand bankHand
   | playerVal > 21 = Bank
-  | playerVal > bankVal = Player
+  | playerVal > bankVal = Guest
   | otherwise = Bank
     where playerVal = value playerHand
           bankVal = value bankHand
