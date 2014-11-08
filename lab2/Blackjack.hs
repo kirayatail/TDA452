@@ -36,3 +36,6 @@ value' (Add _ n) = tupleSum (10, 0) (value' n)
 
 tupleSum:: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
 tupleSum (a, b) (a', b') = (a + a', b + b')
+
+gameOver:: Hand -> Bool
+gameOver h = value h > 21
