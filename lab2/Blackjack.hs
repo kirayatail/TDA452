@@ -21,22 +21,27 @@ hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hear
 empty :: Hand
 empty = Empty
 
+-- Uses value' to have a separate sum of the aces, and multiply aces by 11
+-- only if the total sum is <= 21.
 value :: Hand -> Integer
 value h = let (val, aces) = value' h in
           let bigVal = val + aces * 11 in
-          if bigVal < 21 then bigVal
+          if bigVal <= 21 then bigVal
           else val + aces
 
-
+-- Sum the values of all cards except aces in the first member of the tuple,
+-- Count of aces in the second member of the tuple.
 value' :: Hand ->  (Integer, Integer)
 value' Empty = (0, 0)
 value' (Add (Card Ace _) n) = tupleSum (0, 1) (value' n)
 value' (Add (Card (Numeric num) _) n) = tupleSum (num, 0) (value' n)
 value' (Add _ n) = tupleSum (10, 0) (value' n)
 
+-- Function for summing corresponding members of two tuples
 tupleSum:: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
 tupleSum (a, b) (a', b') = (a + a', b + b')
 
+-- bust means value > 21
 gameOver:: Hand -> Bool
 gameOver h = value h > 21
 
