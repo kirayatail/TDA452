@@ -25,7 +25,7 @@ empty = Empty
 -- Calculates the value of a hand taking the rules about aces into account.
 value :: Hand -> Integer
 value h | highVal <= 21 = highVal
-        | otherwise    = lowVal
+        | otherwise = lowVal
         where (lowVal, aces) = lowValueAndAces h
               highVal = lowVal + aces * 10
 
@@ -33,9 +33,8 @@ value h | highVal <= 21 = highVal
 -- the amount of aces.
 lowValueAndAces :: Hand ->  (Integer, Integer)
 lowValueAndAces Empty                          = (0, 0)
-lowValueAndAces (Add (Card Ace _) n)           = tupleSum (1, 1)(lowValueAndAces n)
-lowValueAndAces (Add (Card (Numeric num) _) n) = tupleSum (num, 0) (lowValueAndAces n)
-lowValueAndAces (Add _ n)                      = tupleSum (10, 0) (lowValueAndAces n)
+lowValueAndAces (Add (Card Ace _) n) = tupleSum (1, 1)(lowValueAndAces n)
+lowValueAndAces (Add c n) = tupleSum (valueCard c, 0) (lowValueAndAces n)
 
 -- Function for summing corresponding members of two tuples
 tupleSum:: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
