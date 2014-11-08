@@ -39,3 +39,11 @@ tupleSum (a, b) (a', b') = (a + a', b + b')
 
 gameOver:: Hand -> Bool
 gameOver h = value h > 21
+
+winner :: Hand -> Hand -> Player
+winner playerHand bankHand
+  | playerVal > 21 = Bank
+  | playerVal > bankVal = Player
+  | otherwise = Bank
+    where playerVal = value playerHand
+          bankVal = value bankHand
