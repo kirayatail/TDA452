@@ -32,7 +32,7 @@ value h | highVal <= 21 = highVal
 -- Traverses a hand and returns the value where aces count as 1 and
 -- the amount of aces.
 lowValueAndAces :: Hand ->  (Integer, Integer)
-lowValueAndAces Empty                          = (0, 0)
+lowValueAndAces Empty = (0, 0)
 lowValueAndAces (Add (Card Ace _) n) = tupleSum (1, 1)(lowValueAndAces n)
 lowValueAndAces (Add c n) = tupleSum (valueCard c, 0) (lowValueAndAces n)
 
