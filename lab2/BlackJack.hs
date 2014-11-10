@@ -19,23 +19,29 @@ hand1 = Add (Card Jack Clubs) (Add (Card Ace Hearts) Empty)
 hand2 = Add (Card Jack Spades) (Add (Card King Hearts) Empty)
 hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hearts) Empty))
 
+-- Create an empty hand.
 empty :: Hand
 empty = Empty
 
+-- Determine the value of a hand, taking the special rules about aces into
+-- account.
 value:: Hand -> Integer
 value h | handValue h + (10 * numberOfAces h) > 21 = handValue h
         | otherwise = handValue h + (10 * numberOfAces h)
         where handValue Empty = 0
               handValue (Add c h') = valueCard c + handValue h'
 
+-- Determine the value of a card.
+valueCard:: Card -> Integer
+valueCard (Card r _) = valueRank r
+
+-- Determine the value  of a rank. Here aces count as 1.
 valueRank:: Rank -> Integer
 valueRank Ace = 1
 valueRank (Numeric n) = n
 valueRank _ = 10
 
-valueCard:: Card -> Integer
-valueCard (Card r _) = valueRank r
-
+-- Count how many aces a hand contains.
 numberOfAces:: Hand -> Integer
 numberOfAces Empty = 0
 numberOfAces (Add (Card Ace _) h) = 1 + numberOfAces h
