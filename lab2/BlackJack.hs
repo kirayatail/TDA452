@@ -1,7 +1,5 @@
 --  Lab 2 - A  Simple Black Jack Variant
 
---Part 2
-
 -- Hand execution of size hand2
 {-
 size hand2
@@ -15,10 +13,6 @@ module BlackJack where
 import Cards
 import Wrapper
 
-hand1 = Add (Card Jack Clubs) (Add (Card Ace Hearts) Empty)
-hand2 = Add (Card Jack Spades) (Add (Card King Hearts) Empty)
-hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hearts) Empty))
-
 -- Create an empty hand.
 empty :: Hand
 empty = Empty
@@ -27,12 +21,13 @@ empty = Empty
 -- account.
 value:: Hand -> Integer
 value h | highValue > 21 = lowValue
-        | otherwise = highValue
-        where aces = numberOfAces h
-              handValue Empty = 0
-              handValue (Add c h') = valueCard c + handValue h'
-              lowValue = handValue h
-              highValue = lowValue h + aces * 10
+        | otherwise      = highValue
+        where
+          aces                 = numberOfAces h
+          handValue Empty      = 0
+          handValue (Add c h') = valueCard c + handValue h'
+          lowValue             = handValue h
+          highValue            = lowValue h + aces * 10
 
 -- Determine the value of a card.
 valueCard:: Card -> Integer
@@ -40,15 +35,15 @@ valueCard (Card r _) = valueRank r
 
 -- Determine the value  of a rank. Here aces count as 1.
 valueRank:: Rank -> Integer
-valueRank Ace = 1
+valueRank Ace         = 1
 valueRank (Numeric n) = n
-valueRank _ = 10
+valueRank _           = 10
 
 -- Count how many aces a hand contains.
 numberOfAces:: Hand -> Integer
-numberOfAces Empty = 0
+numberOfAces Empty                = 0
 numberOfAces (Add (Card Ace _) h) = 1 + numberOfAces h
-numberOfAces (Add _ h) = numberOfAces h
+numberOfAces (Add _ h)            = numberOfAces h
 
 -- Determines if the game is over. This happens when one of the players go bust.
 gameOver:: Hand -> Bool
@@ -61,6 +56,6 @@ winner :: Hand -> Hand -> Player
 winner playerHand bankHand
   | gameOver playerHand = Bank
   | playerVal > bankVal = Guest
-  | otherwise = Bank
-    where playerVal = value playerHand
-          bankVal = value bankHand
+  | otherwise           = Bank
+  where playerVal = value playerHand
+        bankVal   = value bankHand
