@@ -30,7 +30,7 @@ value h | highValue > 21 = lowValue
           handValue Empty      = 0
           handValue (Add c h') = valueCard c + handValue h'
           lowValue             = handValue h
-          highValue            = lowValue h + aces * 10
+          highValue            = lowValue + aces * 10
 
 -- Determine the value of a card.
 valueCard:: Card -> Integer
