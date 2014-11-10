@@ -47,10 +47,13 @@ numberOfAces Empty = 0
 numberOfAces (Add (Card Ace _) h) = 1 + numberOfAces h
 numberOfAces (Add _ h) = numberOfAces h
 
--- bust means value > 21
+-- Determines if the game is over. This happens when one of the players go bust.
 gameOver:: Hand -> Bool
 gameOver h = value h > 21
 
+-- Determines whether the bank or guest wins.
+-- The implementation assumes only one of the players have gone bust as
+-- specified in the rules.
 winner :: Hand -> Hand -> Player
 winner playerHand bankHand
   | playerVal > 21 = Bank
