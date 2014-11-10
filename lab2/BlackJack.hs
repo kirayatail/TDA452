@@ -26,10 +26,13 @@ empty = Empty
 -- Determine the value of a hand, taking the special rules about aces into
 -- account.
 value:: Hand -> Integer
-value h | handValue h + (10 * numberOfAces h) > 21 = handValue h
-        | otherwise = handValue h + (10 * numberOfAces h)
-        where handValue Empty = 0
+value h | highValue > 21 = lowValue
+        | otherwise = highValue
+        where aces = numberOfAces h
+              handValue Empty = 0
               handValue (Add c h') = valueCard c + handValue h'
+              lowValue = handValue h
+              highValue = lowValue h + aces * 10
 
 -- Determine the value of a card.
 valueCard:: Card -> Integer
