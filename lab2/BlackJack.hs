@@ -22,23 +22,11 @@ hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hear
 empty :: Hand
 empty = Empty
 
--- Calculates the value of a hand taking the rules about aces into account.
-value :: Hand -> Integer
-value h | highVal <= 21 = highVal
-        | otherwise = lowVal
-        where (lowVal, aces) = lowValueAndAces h
-              highVal = lowVal + aces * 10
-
--- Traverses a hand and returns the value where aces count as 1 and
--- the amount of aces.
-lowValueAndAces :: Hand ->  (Integer, Integer)
-lowValueAndAces Empty = (0, 0)
-lowValueAndAces (Add (Card Ace _) n) = tupleSum (1, 1)(lowValueAndAces n)
-lowValueAndAces (Add c n) = tupleSum (valueCard c, 0) (lowValueAndAces n)
-
--- Function for summing corresponding members of two tuples
-tupleSum:: (Integer, Integer) -> (Integer, Integer) -> (Integer, Integer)
-tupleSum (a, b) (a', b') = (a + a', b + b')
+value:: Hand -> Integer
+value h | handValue h + (10 * numberOfAces h) > 21 = handValue h
+        | otherwise = handValue h + (10 * numberOfAces h)
+        where handValue Empty = 0
+              handValue (Add c h') = valueCard c + handValue h'
 
 valueRank:: Rank -> Integer
 valueRank Ace = 1
@@ -52,12 +40,6 @@ numberOfAces:: Hand -> Integer
 numberOfAces Empty = 0
 numberOfAces (Add (Card Ace _) h) = 1 + numberOfAces h
 numberOfAces (Add _ h) = numberOfAces h
-
-valueAlt:: Hand -> Integer
-valueAlt h | handValue h + (10 * numberOfAces h) > 21 = handValue h
-           | otherwise = handValue h + (10 * numberOfAces h)
-             where handValue Empty = 0
-                   handValue (Add c h') = valueCard c + handValue h'
 
 -- bust means value > 21
 gameOver:: Hand -> Bool
