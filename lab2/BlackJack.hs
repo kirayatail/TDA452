@@ -77,5 +77,7 @@ winner playerHand bankHand
 prop_onTopOf_assoc ::Hand -> Hand -> Hand -> Bool
 prop_onTopOf_assoc h1 h2 h3 = h1 <+ (h2 <+ h3) == (h1 <+ h2) <+ h3
 
+-- Ensure that the size of two hands on top of each other is the same as
+-- the size of the sum of the sizes of the separate hands.
 prop_size_onTopOf :: Hand -> Hand -> Bool
 prop_size_onTopOf h1 h2 =  size h1  + size h2 == size (h1 <+ h2)
