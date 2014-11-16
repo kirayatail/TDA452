@@ -72,6 +72,16 @@ winner playerHand bankHand
 (<+) Empty bottom = bottom
 (<+) (Add topCard topHand) bottom = Add topCard (topHand <+ bottom)
 
+-- Generate a full deck (not shuffled)
+fullDeck :: Hand
+fullDeck = suitHand ranks Spades <+ suitHand ranks Diamonds <+
+           suitHand ranks Clubs <+ suitHand ranks Hearts
+  where
+    ranks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
+    suitHand :: [Rank] -> Suit -> Hand
+    suitHand (r:rs) s = Add (Card r s) (suitHand rs s)
+    suitHand _ s = Empty
+
 
 -- Ensure that <+ is assocoiative
 prop_onTopOf_assoc ::Hand -> Hand -> Hand -> Bool
