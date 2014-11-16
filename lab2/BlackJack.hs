@@ -16,6 +16,10 @@ module BlackJack where
 import Cards
 import Wrapper
 
+hand1 = Add (Card Jack Clubs) (Add (Card Ace Hearts) Empty)
+hand2 = Add (Card Jack Spades) (Add (Card King Hearts) Empty)
+hand3 = Add (Card Ace Spades) (Add (Card Ace Hearts) (Add (Card (Numeric 3) Hearts) Empty))
+
 -- Create an empty hand.
 empty :: Hand
 empty = Empty
@@ -62,3 +66,16 @@ winner playerHand bankHand
   | otherwise           = Bank
   where playerVal = value playerHand
         bankVal   = value bankHand
+
+-- Puts the first hand on top of the second.
+(<+) ::Hand -> Hand -> Hand
+(<+) Empty bottom = bottom
+(<+) (Add topCard topHand) bottom = Add topCard (topHand <+ bottom)
+
+
+-- Ensure that <+ is assocoiative
+prop_onTopOf_assoc ::Hand -> Hand -> Hand -> Bool
+prop_onTopOf_assoc h1 h2 h3 = h1 <+ (h2 <+ h3) == (h1 <+ h2) <+ h3
+
+prop_size_onTopOf :: Hand -> Hand -> Bool
+prop_size_onTopOf h1 h2 =  size h1  + size h2 == size (h1 <+ h2)
