@@ -91,3 +91,9 @@ prop_onTopOf_assoc h1 h2 h3 = h1 <+ (h2 <+ h3) == (h1 <+ h2) <+ h3
 -- the size of the sum of the sizes of the separate hands.
 prop_size_onTopOf :: Hand -> Hand -> Bool
 prop_size_onTopOf h1 h2 =  size h1  + size h2 == size (h1 <+ h2)
+
+
+-- Draw the top card of the deck and put it into a hand.
+draw :: Hand -> Hand -> (Hand, Hand)
+draw Empty _ = error "draw: The deck is empty."
+draw (Add top deck) hand = (deck, Add top hand)
