@@ -89,10 +89,10 @@ fullDeck = suit Spades <+
            suit Hearts
   where
     ranks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
-    suit = suitHand ranks
-    suitHand :: [Rank] -> Suit -> Hand
-    suitHand (r:rs) s = Add (Card r s) (suitHand rs s)
-    suitHand _ _ = Empty
+    suit = suitFromList ranks
+    suitFromList :: [Rank] -> Suit -> Hand
+    suitFromList (r:rs) s = Add (Card r s) (suitFromList rs s)
+    suitFromList _ _ = Empty
 
 -- Draw the top card of the deck and put it into a hand.
 draw :: Hand -> Hand -> (Hand, Hand)
