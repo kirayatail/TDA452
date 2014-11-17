@@ -143,6 +143,7 @@ prop_shuffle_sameCards g c h =
 prop_size_shuffle :: StdGen -> Hand -> Bool
 prop_size_shuffle g h = size h == size (shuffle g h)
 
+-- Implement the inteface for the game.
 implementation = Interface
   {
     iEmpty    = empty,
@@ -155,5 +156,6 @@ implementation = Interface
     iShuffle  = shuffle
   }
 
+-- Start a game of Black Jack.
 main :: IO()
 main = runGame implementation
