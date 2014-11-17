@@ -90,7 +90,6 @@ fullDeck = suit Spades <+
   where
     ranks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
     suit = suitFromList ranks
-    suitFromList :: [Rank] -> Suit -> Hand
     suitFromList (r:rs) s = Add (Card r s) (suitFromList rs s)
     suitFromList _ _ = Empty
 
