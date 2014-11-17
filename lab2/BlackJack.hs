@@ -100,14 +100,15 @@ draw :: Hand -> Hand -> (Hand, Hand)
 draw Empty _ = error "draw: The deck is empty."
 draw (Add top deck) hand = (deck, Add top hand)
 
--- The basic AI for the bank
+-- The basic AI for the bank.
 playBank :: Hand -> Hand
 playBank deck = playBank' deck empty
 
+-- Recursive part of playBank.
 playBank' :: Hand -> Hand -> Hand
 playBank' deck hand
   | value hand' < 16 = playBank' deck' hand'
-  | otherwise       = hand'
+  | otherwise        = hand'
   where (deck', hand') = draw deck hand
 
 shuffle :: StdGen -> Hand -> Hand
@@ -122,3 +123,13 @@ pickCard Empty (Add card top) _ = error "pickCard: Deck is empty"
 pickCard deck (Add card top) 0  = (card, top <+ deck)
 pickCard deck top num           = pickCard deck' top' (num - 1)
   where (deck', top')           = draw deck top
+
+-- Check if a card is in a hand.
+belongsTo :: Card -> Hand -> Bool
+c `belongsTo` Empty      = False
+c `belongsTo` (Add c' h) = c == c' || c' `belongsTo` h
+
+-- Ensure that a card that belongs to a deck is still there after shuffling.
+prop_shuffle_sameCards :: StdGen -> Card -> Hand -> Bool
+prop_shuffle_sameCards g c h =
+  c `belongsTo` h == c `belongsTo` shuffle g h
