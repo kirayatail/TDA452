@@ -136,4 +136,4 @@ prop_shuffle_sameCards g c h =
 
 -- Ensure that the size of a hand is preserved after shuffling.
 prop_size_shuffle :: StdGen -> Hand -> Bool
-prop_size_shuffle g h = size h == (size $ shuffle g h)
+prop_size_shuffle g h = size h == size (shuffle g h)
