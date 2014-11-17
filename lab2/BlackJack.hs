@@ -132,7 +132,7 @@ pickCard deck top num           = pickCard deck' top' (num - 1)
 -- Check if a card is in a hand.
 belongsTo :: Card -> Hand -> Bool
 c `belongsTo` Empty      = False
-c `belongsTo` (Add c' h) = c == c' || c' `belongsTo` h
+c `belongsTo` (Add c' h) = c == c' || c `belongsTo` h
 
 -- Ensure that a card that belongs to a deck is still there after shuffling.
 prop_shuffle_sameCards :: StdGen -> Card -> Hand -> Bool
