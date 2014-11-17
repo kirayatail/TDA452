@@ -154,3 +154,6 @@ implementation = Interface
     iPlayBank = playBank,
     iShuffle  = shuffle
   }
+
+main :: IO()
+main = runGame implementation
