@@ -58,6 +58,7 @@ gameOver h = value h > 21
 winner :: Hand -> Hand -> Player
 winner playerHand bankHand
   | gameOver playerHand = Bank
+  | gameOver bankHand   = Guest
   | playerVal > bankVal = Guest
   | otherwise           = Bank
   where playerVal = value playerHand
