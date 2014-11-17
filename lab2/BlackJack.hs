@@ -121,17 +121,16 @@ shuffle' :: StdGen -> Hand -> Hand -> Hand
 shuffle' g Empty new = new
 shuffle' g deck new = shuffle' g' deck' (Add card new)
   where
-    (num, g') = randomR (0, size deck -1) g
+    (num, g') = randomR (1, size deck) g
     (card, deck') = pickCard deck Empty num
 
 -- Go through the deck, return the card at place num
 -- and the rest of the cards as one hand.
 pickCard :: Hand -> Hand -> Integer -> (Card, Hand)
-pickCard Empty Empty _          = error "pickCard: All hands are empty"
-pickCard Empty (Add card top) _ = (card, top)
-pickCard deck (Add card top) 0  = (card, top <+ deck)
-pickCard deck top num           = pickCard deck' top' (num - 1)
-  where (deck', top')           = draw deck top
+pickCard deck (Add card top) 0 = (card, top <+ deck)
+pickCard deck top num =
+  let (deck', top') = draw deck top in
+  pickCard deck' top' (num - 1)
 
 -- Check if a card is in a hand.
 belongsTo :: Card -> Hand -> Bool
