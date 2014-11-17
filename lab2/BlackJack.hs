@@ -98,3 +98,7 @@ fullDeck = suit Spades <+
 draw :: Hand -> Hand -> (Hand, Hand)
 draw Empty _ = error "draw: The deck is empty."
 draw (Add top deck) hand = (deck, Add top hand)
+
+playBank :: Hand -> Hand
+
+shuffle :: StdGen -> Hand -> Hand
