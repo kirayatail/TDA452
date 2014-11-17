@@ -112,14 +112,19 @@ playBank' deck hand
   where (deck', hand') = draw deck hand
 
 shuffle :: StdGen -> Hand -> Hand
-shuffle = undefined
+shuffle g hand = shuffle' g hand Empty
 
--- shuffle' :: StdGen -> Hand -> Hand -> Hand
+shuffle' :: StdGen -> Hand -> Hand -> Hand
+shuffle' g Empty new = new
+shuffle' g deck new = shuffle' g' deck' (Add card new)
+  where
+    (num, g') = randomR (0, size deck) g
+    (card, deck') = pickCard deck Empty num
 
 -- Go through the deck
-pickCard :: (Num a, Eq a) => Hand -> Hand -> a -> (Card, Hand)
+pickCard :: Hand -> Hand -> Integer -> (Card, Hand)
 pickCard Empty Empty _          = error "pickCard: All hands are empty"
-pickCard Empty (Add card top) _ = error "pickCard: Deck is empty"
+pickCard Empty (Add card top) num = (card, top)
 pickCard deck (Add card top) 0  = (card, top <+ deck)
 pickCard deck top num           = pickCard deck' top' (num - 1)
   where (deck', top')           = draw deck top
