@@ -15,6 +15,7 @@
 module BlackJack where
 import Cards
 import Wrapper
+import System.Random
 
 hand1 = Add (Card Jack Clubs) (Add (Card Ace Hearts) Empty)
 hand2 = Add (Card Jack Spades) (Add (Card King Hearts) Empty)
@@ -110,3 +111,14 @@ playBank' deck hand
   where (deck', hand') = draw deck hand
 
 shuffle :: StdGen -> Hand -> Hand
+shuffle = undefined
+
+-- shuffle' :: StdGen -> Hand -> Hand -> Hand
+
+-- Go through the deck
+pickCard :: (Num a, Eq a) => Hand -> Hand -> a -> (Card, Hand)
+pickCard Empty Empty _          = error "pickCard: All hands are empty"
+pickCard Empty (Add card top) _ = error "pickCard: Deck is empty"
+pickCard deck (Add card top) 0  = (card, top <+ deck)
+pickCard deck top num           = pickCard deck' top' (num - 1)
+  where (deck', top')           = draw deck top
