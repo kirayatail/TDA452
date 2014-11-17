@@ -99,6 +99,14 @@ draw :: Hand -> Hand -> (Hand, Hand)
 draw Empty _ = error "draw: The deck is empty."
 draw (Add top deck) hand = (deck, Add top hand)
 
+-- The basic AI for the bank
 playBank :: Hand -> Hand
+playBank deck = playBank' deck empty
+
+playBank' :: Hand -> Hand -> Hand
+playBank' deck hand
+  | value hand' < 16 = playBank' deck' hand'
+  | otherwise       = hand'
+  where (deck', hand') = draw deck hand
 
 shuffle :: StdGen -> Hand -> Hand
