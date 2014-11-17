@@ -84,13 +84,15 @@ prop_size_onTopOf h1 h2 =  size h1  + size h2 == size (h1 <+ h2)
 
 -- Generate a full deck (not shuffled)
 fullDeck :: Hand
-fullDeck = suitHand ranks Spades <+ suitHand ranks Diamonds <+
-           suitHand ranks Clubs <+ suitHand ranks Hearts
+fullDeck = suit Spades <+
+           suit Diamonds <+
+           suit Clubs <+
+           suit Hearts
   where
     ranks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
-    suitHand :: [Rank] -> Suit -> Hand
-    suitHand (r:rs) s = Add (Card r s) (suitHand rs s)
-    suitHand _ s = Empty
+    suit = suitFromList ranks
+    suitFromList (r:rs) s = Add (Card r s) (suitFromList rs s)
+    suitFromList _ _ = Empty
 
 -- Draw the top card of the deck and put it into a hand.
 draw :: Hand -> Hand -> (Hand, Hand)
