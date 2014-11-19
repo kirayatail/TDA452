@@ -115,8 +115,8 @@ playBank' deck hand
 shuffle :: StdGen -> Hand -> Hand
 shuffle g hand = shuffle' g hand Empty
 
--- Pick random cards from one hand and place it in the other
--- until first hand is empty.
+-- Recursive part of shuffle. Pick random cards from one hand and
+-- place it in the other until first hand is empty.
 shuffle' :: StdGen -> Hand -> Hand -> Hand
 shuffle' g Empty new = new
 shuffle' g deck new = shuffle' g' deck' (Add card new)
