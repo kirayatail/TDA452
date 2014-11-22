@@ -70,9 +70,12 @@ prop_Sudoku = isSudoku
 -------------------------------------------------------------------------
 
 type Block = [Maybe Int]
+
 -- Block doesn't contain the same digit twice
+-- Unique count plus 'Nothing' count should be 9 + 1
+-- (one 'Nothing' in the unique list in any case).
 isOkayBlock :: Block -> Bool
-isOkayBlock b = length (nub b) == 10 - length (filter (== Nothing) b)
+isOkayBlock b = length (nub (Nothing:b)) == 10 - length (filter (== Nothing) b)
 
 -- Create a list of all blocks of a sudoku (rows, cols, 3x3-fields)
 blocks :: Sudoku -> [Block]
