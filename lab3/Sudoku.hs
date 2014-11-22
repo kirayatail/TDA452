@@ -29,20 +29,12 @@ isSolved (Sudoku rows) = isSudoku (Sudoku rows)
 -------------------------------------------------------------------------
 
 -- printSudoku sud prints a representation of the sudoku sud on the screen
-printSudoku :: Sudoku -> IO ()
-printSudoku (Sudoku []) = return ()
-printSudoku (Sudoku (r:rows)) =
-  do
-     printRow r
-     printSudoku (Sudoku rows)
-  where printRow :: [Maybe Int] -> IO ()
-        printRow [] = putStrLn ""
-        printRow (x:xs) =
-          do putStr $ elemStr x
-             printRow xs
-        elemStr :: Maybe Int -> String
-        elemStr Nothing = "."
-        elemStr (Just i) = show i
+-- printSudoku :: Sudoku -> IO ()
+printSudoku (Sudoku rows) = putStr $ unlines $ map stringRows rows
+  where
+        stringRows = map elemStr
+        elemStr Nothing = '.'
+        elemStr (Just i) = head $ show i
 
 -- readSudoku file reads from the file, and either delivers it, or stops
 -- if the file did not contain a sudoku
