@@ -21,7 +21,8 @@ isSudoku (Sudoku su) = isNine su && and [isNine x | x <- su]
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved = undefined
+isSolved (Sudoku rows) = isSudoku (Sudoku rows)
+  && [] == filter (==Nothing) (concat rows)
 
 -------------------------------------------------------------------------
 
