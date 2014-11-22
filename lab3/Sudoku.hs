@@ -72,6 +72,7 @@ instance Arbitrary Sudoku where
 
 -- Property of a sudoku
 prop_Sudoku :: Sudoku -> Bool
+prop_Sudoku = isSudoku
 
 -------------------------------------------------------------------------
 
