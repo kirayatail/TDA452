@@ -67,29 +67,28 @@ instance Arbitrary Sudoku where
     do rows <- sequence [ sequence [ cell | j <- [1..9] ] | i <- [1..9] ]
        return (Sudoku rows)
 
+-- Property of a sudoku
+prop_Sudoku :: Sudoku -> Bool
+
 -------------------------------------------------------------------------
 
--- A1
+type Block = [Maybe Int]
+-- Block doesn't contain the same digit twice
+isOkayBlock :: Block -> Bool
+isOkayBlock = undefined
 
--- A2
+-- Create a list of all blocks of a sudoku (rows, cols, 3x3-fields)
+blocks :: Sudoku -> [Block]
+blocks = undefined
 
--- A3
+-- A sudoku should contain exactly 3x9 blocks, each block contains 9 elements
+prop_SudokuCorrectBlocks :: Sudoku -> Bool
+prop_SudokuCorrectBlocks = undefined
 
--- B1
+-- Check that a full sudoku is valid, all blocks should be OK
+isOkay :: Sudoku -> Bool
+isOkay sudo = and [isOkayBlock b | b <- blocks sudo]
 
--- B2
-
--- C1
-
--- C2
-
--- C3
-
--- D1
-
--- D2
-
--- D3
 
 -- Example sudoku:
 example :: Sudoku
