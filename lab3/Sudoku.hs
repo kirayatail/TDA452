@@ -94,6 +94,14 @@ fields' :: [Block] -> [Block]
 fields' []     = []
 fields' blocks = concat (take 3 blocks) : fields' (drop 3 blocks)
 
+fields'' (Sudoku rows) = mergeRows $ concat $ transpose $ map splitRow rows
+  where
+    splitRow :: [a] -> [[a]]
+    splitRow [] = []
+    splitRow row = take 3 row : splitRow (drop 3 row)
+    mergeRows [] = []
+    mergeRows row = concat (take 3 row) : mergeRows (drop 3 row)
+
 -- A sudoku should contain exactly 3x9 blocks, each block contains 9 elements
 prop_SudokuCorrectBlocks :: Sudoku -> Bool
 prop_SudokuCorrectBlocks sudo = length (blocks sudo) == (3*9) &&
