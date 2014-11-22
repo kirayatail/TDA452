@@ -1,6 +1,7 @@
 module Sudoku where
 
 import Test.QuickCheck
+import Data.Char
 
 -------------------------------------------------------------------------
 
@@ -33,7 +34,14 @@ printSudoku = undefined
 -- readSudoku file reads from the file, and either delivers it, or stops
 -- if the file did not contain a sudoku
 readSudoku :: FilePath -> IO Sudoku
-readSudoku = undefined
+readSudoku fp =
+  do
+    s <- readFile fp
+    return $ Sudoku $ map parseRow $ lines s
+  where
+    parseRow = map parseElement
+    parseElement c | isDigit c = Just $ digitToInt c
+                   | otherwise = Nothing
 
 -------------------------------------------------------------------------
 
