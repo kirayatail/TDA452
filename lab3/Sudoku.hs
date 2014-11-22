@@ -2,6 +2,7 @@ module Sudoku where
 
 import Test.QuickCheck
 import Data.Char
+import Data.List
 
 -------------------------------------------------------------------------
 
@@ -79,15 +80,29 @@ prop_Sudoku = isSudoku
 type Block = [Maybe Int]
 -- Block doesn't contain the same digit twice
 isOkayBlock :: Block -> Bool
-isOkayBlock = undefined
+isOkayBlock b = length (nub b) == 10 - length (filter (== Nothing) b)
 
 -- Create a list of all blocks of a sudoku (rows, cols, 3x3-fields)
 blocks :: Sudoku -> [Block]
-blocks = undefined
+blocks (Sudoku rows) = rows ++ transpose rows ++ fields rows
+
+-- Apply fields' to three transposed rows at a time,
+-- merge the result to a list of blocks.
+fields :: [Block] -> [Block]
+fields []   = []
+fields sudo = fields' (transpose (take 3 sudo)) ++
+              fields (drop 3 sudo)
+
+-- Take a list of 9 rows with 3 elements each,
+-- concatenate three rows at a time to a block and merge with remaining blocks.
+fields' :: [Block] -> [Block]
+fields' []     = []
+fields' blocks = concat (take 3 blocks) : fields' (drop 3 blocks)
 
 -- A sudoku should contain exactly 3x9 blocks, each block contains 9 elements
 prop_SudokuCorrectBlocks :: Sudoku -> Bool
-prop_SudokuCorrectBlocks = undefined
+prop_SudokuCorrectBlocks sudo = length (blocks sudo) == (3*9) &&
+                                and [length b == 9 | b <- blocks sudo]
 
 -- Check that a full sudoku is valid, all blocks should be OK
 isOkay :: Sudoku -> Bool
