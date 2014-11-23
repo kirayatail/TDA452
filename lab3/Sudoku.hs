@@ -79,7 +79,7 @@ isOkayBlock b = length (nub (Nothing:b)) == 10 - length (filter (== Nothing) b)
 
 -- Create a list of all blocks of a sudoku (rows, cols, 3x3-fields)
 blocks :: Sudoku -> [Block]
-blocks (Sudoku rows) = rows ++ transpose rows ++ fields'' rows
+blocks (Sudoku rows) = rows ++ transpose rows ++ boxes rows
 
 -- Apply fields' to three transposed rows at a time,
 -- merge the result to a list of blocks.
@@ -94,10 +94,9 @@ fields' :: [Block] -> [Block]
 fields' []     = []
 fields' blocks = concat (take 3 blocks) : fields' (drop 3 blocks)
 
-fields'' :: [Block] -> [Block]
-fields'' rows = mergeRows $ concat $ transpose $ map splitRow rows
+boxes :: [Block] -> [Block]
+boxes rows = mergeRows $ concat $ transpose $ map splitRow rows
   where
-    splitRow :: [a] -> [[a]]
     splitRow [] = []
     splitRow row = take 3 row : splitRow (drop 3 row)
     mergeRows [] = []
