@@ -79,7 +79,7 @@ isOkayBlock b = length (nub (Nothing:b)) == 10 - length (filter (== Nothing) b)
 
 -- Create a list of all blocks of a sudoku (rows, cols, 3x3-fields)
 blocks :: Sudoku -> [Block]
-blocks (Sudoku rows) = rows ++ transpose rows ++ boxes rows
+blocks (Sudoku rows) = rows ++ transpose rows ++ boxes' rows
 
 -- Apply fields' to three transposed rows at a time,
 -- merge the result to a list of blocks.
@@ -101,6 +101,13 @@ boxes rows = mergeRows $ concat $ transpose $ map splitRow rows
     splitRow row = take 3 row : splitRow (drop 3 row)
     mergeRows [] = []
     mergeRows row = concat (take 3 row) : mergeRows (drop 3 row)
+
+boxes' :: [Block] -> [Block]
+boxes' [] = []
+boxes' rows = boxes'' (take 3 rows) ++ boxes' (drop 3 rows)
+  where
+    boxes'' ([] : _) = []
+    boxes'' rows = concatMap (take 3) rows : boxes'' (map (drop 3) rows)
 
 -- A sudoku should contain exactly 3x9 blocks, each block contains 9 elements
 prop_SudokuCorrectBlocks :: Sudoku -> Bool
