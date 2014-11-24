@@ -3,6 +3,8 @@ module Sudoku where
 import Test.QuickCheck
 import Data.Char
 import Data.List
+import Data.Maybe
+import Data.Ix
 
 -------------------------------------------------------------------------
 
@@ -13,13 +15,14 @@ data Sudoku = Sudoku { rows :: [[Maybe Int]] }
 allBlankSudoku :: Sudoku
 allBlankSudoku = Sudoku $ replicate 9 $ replicate 9 Nothing
 
--- isSudoku sud checks if sud is really a valid representation of a sudoku
--- puzzle
+-- isSudoku sud checks if su is really a valid representation of a sudoku
+-- puzzle (size is 9x9 and content inside Maybe is in 1..9)
 isSudoku :: Sudoku -> Bool
-isSudoku (Sudoku su) = isNine su && and [isNine x | x <- su]
-  where
-    isNine :: [a] -> Bool
-    isNine list = length list == 9
+isSudoku (Sudoku su) = length su == 9 &&
+                       and [length x == 9 &&
+                            all validContent (catMaybes x) | x <- su]
+  where validContent = inRange (1,9)
+
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
@@ -79,35 +82,16 @@ isOkayBlock b = length (nub (Nothing:b)) == 10 - length (filter (== Nothing) b)
 
 -- Create a list of all blocks of a sudoku (rows, cols, 3x3-fields)
 blocks :: Sudoku -> [Block]
-blocks (Sudoku rows) = rows ++ transpose rows ++ boxes' rows
+blocks (Sudoku rows) = rows ++ transpose rows ++ boxes rows
 
--- Apply fields' to three transposed rows at a time,
--- merge the result to a list of blocks.
-fields :: [Block] -> [Block]
-fields []   = []
-fields sudo = fields' (transpose (take 3 sudo)) ++
-              fields (drop 3 sudo)
-
--- Take a list of 9 rows with 3 elements each,
--- concatenate three rows at a time to a block and merge with remaining blocks.
-fields' :: [Block] -> [Block]
-fields' []     = []
-fields' blocks = concat (take 3 blocks) : fields' (drop 3 blocks)
-
+-- Create blocks from the 3x3 squares by concatenating three elements in
+-- three rows at a time for all nine rows
 boxes :: [Block] -> [Block]
-boxes rows = mergeRows $ concat $ transpose $ map splitRow rows
+boxes [] = []
+boxes rows = boxes' (take 3 rows) ++ boxes (drop 3 rows)
   where
-    splitRow [] = []
-    splitRow row = take 3 row : splitRow (drop 3 row)
-    mergeRows [] = []
-    mergeRows row = concat (take 3 row) : mergeRows (drop 3 row)
-
-boxes' :: [Block] -> [Block]
-boxes' [] = []
-boxes' rows = boxes'' (take 3 rows) ++ boxes' (drop 3 rows)
-  where
-    boxes'' ([] : _) = []
-    boxes'' rows = concatMap (take 3) rows : boxes'' (map (drop 3) rows)
+    boxes' ([] : _) = []
+    boxes' rows = concatMap (take 3) rows : boxes' (map (drop 3) rows)
 
 -- A sudoku should contain exactly 3x9 blocks, each block contains 9 elements
 prop_SudokuCorrectBlocks :: Sudoku -> Bool
