@@ -26,8 +26,7 @@ isSudoku (Sudoku su) = length su == 9 &&
 
 -- isSolved sud checks if sud is already solved, i.e. there are no blanks
 isSolved :: Sudoku -> Bool
-isSolved (Sudoku rows) = isSudoku (Sudoku rows)
-  && [] == filter (==Nothing) (concat rows)
+isSolved (Sudoku rows) = [] == filter (==Nothing) (concat rows)
 
 -------------------------------------------------------------------------
 
