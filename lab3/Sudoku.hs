@@ -11,6 +11,18 @@ import Data.Ix
 data Sudoku = Sudoku { rows :: [[Maybe Int]] }
  deriving ( Show, Eq )
 
+example :: Sudoku
+example = Sudoku {rows =
+  [[Just 3,Just 6,Nothing,Nothing,Just 7,Just 1,Just 2,Nothing,Nothing],
+   [Nothing,Just 5,Nothing,Nothing,Nothing,Nothing,Just 1,Just 8,Nothing],
+   [Nothing,Nothing,Just 9,Just 2,Nothing,Just 4,Just 7,Nothing,Nothing],
+   [Nothing,Nothing,Nothing,Nothing,Just 1,Just 3,Nothing,Just 2,Just 8],
+   [Just 4,Nothing,Nothing,Just 5,Nothing,Just 2,Nothing,Nothing,Just 9],
+   [Just 2,Just 7,Nothing,Just 4,Just 6,Nothing,Nothing,Nothing,Nothing],
+   [Nothing,Nothing,Just 5,Just 3,Nothing,Just 8,Just 9,Nothing,Nothing],
+   [Nothing,Just 8,Just 3,Nothing,Nothing,Nothing,Nothing,Just 6,Nothing],
+   [Nothing,Nothing,Just 7,Just 6,Just 9,Nothing,Nothing,Just 4,Just 3]]}
+
 -- allBlankSudoku is a sudoku with just blanks
 allBlankSudoku :: Sudoku
 allBlankSudoku = Sudoku $ replicate 9 $ replicate 9 Nothing
@@ -100,3 +112,52 @@ prop_SudokuCorrectBlocks sudo = length (blocks sudo) == (3*9) &&
 -- Check that a full sudoku is valid, all blocks should be OK
 isOkay :: Sudoku -> Bool
 isOkay sudo = and [isOkayBlock b | b <- blocks sudo]
+
+-------------------------------------------------------------------------
+
+-- Following the standard (row, pos)
+type Pos = (Int, Int)
+
+-- Return a list of positions that are still blank in a sudoku
+blanks :: Sudoku -> [Pos]
+blanks (Sudoku rows)= [(r, p) | r <- [0..8], p <- [0..8],
+                       isNothing (rows !! r !! p) ]
+
+prop_BlanksIsBlank :: Sudoku -> Bool
+prop_BlanksIsBlank (Sudoku rows) = and [isNothing (rows !! r !! p) |
+                                   (r, p) <- blanks (Sudoku rows)]
+-- TODO: Möjligen ett redundant test? Proppen kollar inte ifall det finns blanka
+-- som inte blanks hittar.
+
+-- Set value from the tuple at position Int in the list, like a_arr[i] = a
+(!!=) :: [a] -> (Int, a) -> [a]
+(!!=) [] _ = []
+(!!=) (_:es) (0, a) = a:es
+(!!=) (e:es) (i, a) = e:(es !!= (i-1, a))
+-- Also write (a) propert(y/ies) that state(s) the expected properties of
+-- this function. Think about what can go wrong!
+
+-- Set new cell value to a specified position in a Sudoku
+update :: Sudoku -> Pos -> Maybe Int -> Sudoku
+update (Sudoku rows) (r,p) v = Sudoku (rows !!= (r,
+                              (rows !! r) !!= (p, v)))
+
+prop_UpdatedSudokuIsUpdated :: Sudoku -> Bool
+prop_UpdatedSudokuIsUpdated = undefined
+
+-- Returns a list of numbers that are valid candidates at the given position
+candidates :: Sudoku -> Pos -> [Int]
+candidates = undefined
+-- In addition, write a property that relates the function candidates with
+-- the functions update, isSudoku, and isOkay. (This property can be very useful
+-- to understand how to solve Sudokus!)
+
+-------------------------------------------------------------------------
+
+-- The actual solving function
+solve :: Sudoku -> Maybe Sudoku
+solve = undefined
+
+-- Solve Sudoku from file
+readAndSolve :: FilePath -> IO ()
+readAndSolve = undefined
