@@ -156,7 +156,12 @@ candidates = undefined
 
 -- The actual solving function
 solve :: Sudoku -> Maybe Sudoku
-solve = undefined
+solve sud | isSudoku sud && isOkay sud = solve' sud
+          | otherwise                  = Nothing
+  where
+    solve' :: Sudoku -> Maybe Sudoku
+    solve' sud | null (blanks sud) = Just sud
+               | otherwise         = Nothing
 
 -- Solve Sudoku from file
 readAndSolve :: FilePath -> IO ()
