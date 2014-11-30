@@ -206,6 +206,11 @@ isSolutionOf s s' = isSudoku s
     nonBlanksMatch' (_:cs, Nothing:cs')      = nonBlanksMatch' (cs, cs')
     nonBlanksMatch' (c:cs, c':cs') | c == c' = nonBlanksMatch' (cs, cs')
     nonBlanksMatch' _                        = False
---
-prop_SolveSound :: Sudoku -> Property
-prop_SolveSound = undefined
+
+-- Property that that checks if a suggested solution (if a solution exists)
+-- is actually a solution to the given sudoku.
+-- prop_SolveSound :: Sudoku -> Property
+prop_SolveSound s = solveSound $ solve s
+  where
+    solveSound (Just s') = isSolutionOf s' s
+    solveSound _     = True
