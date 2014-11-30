@@ -183,10 +183,19 @@ readAndSolve fp = do
     Nothing -> print "(No solution)"
 
 
--- Check that first sudoku is a solution for the second
+-- Check that first sudoku is a solution for the second.
 isSolutionOf :: Sudoku -> Sudoku -> Bool
-isSolutionOf = undefined
-
+isSolutionOf s s' = isSudoku s
+                    && isOkay s
+                    && isSolved s
+                    && nonBlanksMatch s s'
+  where
+    nonBlanksMatch (Sudoku rows) (Sudoku rows') =
+      all nonBlanksMatch' $ zip rows rows'
+    nonBlanksMatch' ([],[])                  = True
+    nonBlanksMatch' (_:cs, Nothing:cs')      = nonBlanksMatch' (cs, cs')
+    nonBlanksMatch' (c:cs, c':cs') | c == c' = nonBlanksMatch' (cs, cs')
+    nonBlanksMatch' _                        = False
 --
 prop_SolveSound :: Sudoku -> Property
 prop_SolveSound = undefined
