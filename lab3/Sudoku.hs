@@ -186,7 +186,6 @@ solve sud | isSudoku sud && isOkay sud = solve' sud
   solve' s | isSolved s = Just s
   solve' s = tryCandidates s pos $ candidates s pos
     where pos = head $ blanks s
-  tryCandidates s _ _  | isSolved s = Just s
   tryCandidates _ _  [] = Nothing
   tryCandidates s pos (c:cs)
     | isJust s' && isSolved (fromJust s') = s'
