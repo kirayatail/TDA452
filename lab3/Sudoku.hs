@@ -170,8 +170,18 @@ solve sud | isSudoku sud && isOkay sud = solve' sud
           | otherwise                  = Nothing
   where
     solve' :: Sudoku -> Maybe Sudoku
-    solve' sud | null (blanks sud) = Just sud
-               | otherwise         = Nothing
+    solve' s | null (blanks s) = Just s
+             | null cands      = Nothing
+             | otherwise       = solve'' s cands
+      where
+        cands = candidates s (head (blanks s))
+
+    solve'' :: Sudoku -> [Int] -> Maybe Sudoku
+    solve'' _ [] = Nothing
+    solve'' s' (c:cs) | isNothing (solve' newS) = solve'' s' cs
+                      | otherwise               = solve' newS
+      where
+        newS = update s' (head (blanks s')) (Just c)
 
 -- Solve Sudoku from file
 readAndSolve :: FilePath -> IO ()
