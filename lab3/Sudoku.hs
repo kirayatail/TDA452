@@ -149,10 +149,6 @@ prop_UpdatedSudokuIsUpdated = undefined
 candidates :: Sudoku -> Pos -> [Int]
 candidates s p = [x | x <- [1..9], isOkay (update s p (Just x))]
 
--- In addition, write a property that relates the function candidates with
--- the functions update, isSudoku, and isOkay. (This property can be very useful
--- to understand how to solve Sudokus!)
-
 -- Property that checks that all candidates are valid for all blanks in
 -- a sudoku.
 prop_validCandidates :: Sudoku -> Bool
