@@ -165,8 +165,8 @@ prop_validCandidates s = all validCandidates $ blanks s
 -------------------------------------------------------------------------
 
 -- The actual solving function
-solve :: Sudoku -> Maybe Sudoku
-solve sud | isSudoku sud && isOkay sud = solve' sud
+solveM :: Sudoku -> Maybe Sudoku
+solveM sud | isSudoku sud && isOkay sud = solve' sud
           | otherwise                  = Nothing
   where
     solve' :: Sudoku -> Maybe Sudoku
@@ -182,6 +182,20 @@ solve sud | isSudoku sud && isOkay sud = solve' sud
                       | otherwise               = solve' newS
       where
         newS = update s' (head (blanks s')) (Just c)
+
+solve :: Sudoku -> Maybe Sudoku
+solve sud | isSudoku sud && isOkay sud = solve' sud
+          | otherwise                  = Nothing
+ where
+  solve' s | isSolved s = Just s
+  solve' s = tryCandidates s pos $ candidates s pos
+    where pos = head $ blanks s
+  tryCandidates s _ _  | isSolved s = Just s
+  tryCandidates _ _  [] = Nothing
+  tryCandidates s pos (c:cs)
+    | isJust s' && isSolved (fromJust s') = s'
+    | otherwise = tryCandidates s pos cs
+    where s' = solve' (update s pos (Just c))
 
 -- Solve Sudoku from file
 readAndSolve :: FilePath -> IO ()
