@@ -131,10 +131,10 @@ prop_BlanksIsBlank (Sudoku rows) = and [isNothing (rows !! r !! p) |
 
 -- Set value from the tuple at position Int in the list, like a_arr[i] = a
 (!!=) :: [a] -> (Int, a) -> [a]
-(!!=) [] _ = []
-(!!=) (_:es) (0, a) = a:es
-(!!=) (e:es) (i, a) = e:(es !!= (i-1, a))
--- Also write (a) propert(y/ies) that state(s) the expected properties of
+[] !!= _          = []
+(_:es) !!= (0, a) = a:es
+(e:es) !!= (i, a) = e:(es !!= (i-1, a))
+-- TODO: Also write (a) propert(y/ies) that state(s) the expected properties of
 -- this function. Think about what can go wrong!
 
 -- Set new cell value to a specified position in a Sudoku
@@ -161,3 +161,11 @@ solve = undefined
 -- Solve Sudoku from file
 readAndSolve :: FilePath -> IO ()
 readAndSolve = undefined
+
+-- Check that first sudoku is a solution for the second
+isSolutionOf :: Sudoku -> Sudoku -> Bool
+isSolutionOf = undefined
+
+--
+prop_SolveSound :: Sudoku -> Property
+prop_SolveSound = undefined
