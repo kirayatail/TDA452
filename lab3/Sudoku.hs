@@ -5,6 +5,7 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import Data.Ix
+import Data.Function
 
 -------------------------------------------------------------------------
 
@@ -160,24 +161,30 @@ prop_validCandidates s = all validCandidates $ blanks s
 
 -------------------------------------------------------------------------
 
+-- Picks out the blank with least candidates together with the candidates
+bestPosition :: Sudoku -> (Pos, [Int])
+bestPosition s = minimumBy (compare `on` (length . snd)) [(p, candidates s p) | p <- blanks s]
+
+-- Same interface as above, picks the first (stupid) blank
+firstPosition :: Sudoku -> (Pos, [Int])
+firstPosition s = (pos, candidates s pos)
+  where pos = head (blanks s)
+
 -- The actual solving function
 solveM :: Sudoku -> Maybe Sudoku
 solveM sud | isSudoku sud && isOkay sud = solve' sud
-          | otherwise                  = Nothing
+           | otherwise                  = Nothing
   where
     solve' :: Sudoku -> Maybe Sudoku
-    solve' s | null (blanks s) = Just s
-             | null cands      = Nothing
-             | otherwise       = solve'' s cands
-      where
-        cands = candidates s (head (blanks s))
-
-    solve'' :: Sudoku -> [Int] -> Maybe Sudoku
-    solve'' _ [] = Nothing
-    solve'' s' (c:cs) | isNothing (solve' newS) = solve'' s' cs
-                      | otherwise               = solve' newS
-      where
-        newS = update s' (head (blanks s')) (Just c)
+    solve' s | isSolved s = Just s
+             | otherwise  = solve'' s pos cands
+      where (pos, cands) = bestPosition s
+    solve'' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
+    solve'' _ _ [] = Nothing
+    solve'' s _ _       | isSolved s     = Just s
+    solve'' s p (c:cs)  | isNothing newS = solve'' s p cs
+                        | otherwise      = newS
+      where newS = solve' $ update s p (Just c)
 
 solve :: Sudoku -> Maybe Sudoku
 solve sud | isSudoku sud && isOkay sud = solve' sud
@@ -196,7 +203,7 @@ solve sud | isSudoku sud && isOkay sud = solve' sud
 readAndSolve :: FilePath -> IO ()
 readAndSolve fp = do
   s <- readSudoku fp
-  let res = solve s
+  let res = solveM s
   case res of
     Just s' -> printSudoku s'
     Nothing -> print "(No solution)"
