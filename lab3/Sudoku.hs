@@ -147,10 +147,20 @@ prop_UpdatedSudokuIsUpdated = undefined
 
 -- Returns a list of numbers that are valid candidates at the given position
 candidates :: Sudoku -> Pos -> [Int]
-candidates = undefined
+candidates s p = [x | x <- [1..9], isOkay (update s p (Just x))]
+
 -- In addition, write a property that relates the function candidates with
 -- the functions update, isSudoku, and isOkay. (This property can be very useful
 -- to understand how to solve Sudokus!)
+
+-- Property that checks that all candidates are valid for all blanks in
+-- a sudoku.
+prop_validCandidates :: Sudoku -> Bool
+prop_validCandidates s = all validCandidates $ blanks s
+  where
+    validCandidates p = and
+      [isSudoku s' && isOkay s' |
+        s' <- map (update s p . Just) (candidates s p)]
 
 -------------------------------------------------------------------------
 
