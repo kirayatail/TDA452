@@ -175,7 +175,13 @@ solve sud | isSudoku sud && isOkay sud = solve' sud
 
 -- Solve Sudoku from file
 readAndSolve :: FilePath -> IO ()
-readAndSolve = undefined
+readAndSolve fp = do
+  s <- readSudoku fp
+  let res = solve s
+  case res of
+    Just s' -> printSudoku s'
+    Nothing -> print "(No solution)"
+
 
 -- Check that first sudoku is a solution for the second
 isSolutionOf :: Sudoku -> Sudoku -> Bool
