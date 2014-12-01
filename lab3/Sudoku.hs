@@ -135,8 +135,17 @@ prop_BlanksIsBlank (Sudoku rows) = and [isNothing (rows !! r !! p) |
 [] !!= _          = []
 (_:es) !!= (0, a) = a:es
 (e:es) !!= (i, a) = e:(es !!= (i-1, a))
--- TODO: Also write (a) propert(y/ies) that state(s) the expected properties of
--- this function. Think about what can go wrong!
+
+-- Check that an updated list has the same lenth, that the value has been
+-- updated and that the rest of the list is unmodified.
+prop_updateList :: NonEmptyList Int -> Int -> Property
+prop_updateList (NonEmpty xs) x =
+  forAll (choose (0, length xs - 1)) $ \i ->
+  let xs' = xs !!= (i,x) in
+  length xs == length xs'
+  && x == xs' !! i
+  && take i xs == take i xs'
+  && drop (i + 1) xs == drop (i + 1) xs'
 
 -- Set new cell value to a specified position in a Sudoku
 update :: Sudoku -> Pos -> Maybe Int -> Sudoku
@@ -236,8 +245,7 @@ isSolutionOf s s' = isSudoku s
 
 -- Property that that checks if a suggested solution (if a solution exists)
 -- is actually a solution to the given sudoku.
--- prop_SolveSound :: Sudoku -> Property
-prop_SolveSound s = solveSound $ solve s
+prop_SolveSound :: Sudoku -> Property
+prop_SolveSound s = isJust s' ==> isSolutionOf (fromJust s') s
   where
-    solveSound (Just s') = isSolutionOf s' s
-    solveSound _     = True
+    s' = solve s
