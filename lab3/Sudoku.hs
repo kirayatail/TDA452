@@ -167,8 +167,8 @@ candidates s (r,p) = [1..9] \\ takenNums s (r,p)
 
 -- Property that checks that all candidates are valid for all blanks in
 -- a sudoku.
-prop_validCandidates :: Sudoku -> Bool
-prop_validCandidates s = all validCandidates $ blanks s
+prop_validCandidates :: Sudoku -> Property
+prop_validCandidates s = isOkay s ==> all validCandidates $ blanks s
   where
     validCandidates p = and
       [isSudoku s' && isOkay s' |
