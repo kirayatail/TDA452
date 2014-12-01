@@ -155,6 +155,7 @@ update (Sudoku rows) (r,p) v = Sudoku (rows !!= (r,
 prop_UpdatedSudokuIsUpdated :: Sudoku -> Bool
 prop_UpdatedSudokuIsUpdated = undefined
 
+
 -- Returns a list of numbers that are valid candidates at the given position.
 -- Subtract numbers already in the row, col and box from all possible numbers.
 candidates :: Sudoku -> Pos -> [Int]
