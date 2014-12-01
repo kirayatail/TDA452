@@ -7,6 +7,7 @@ import Control.Exception
 import System.CPUTime
 import System.Directory
 import System.FilePath
+import Data.List
 
 {-
 
@@ -28,16 +29,32 @@ main = do
     mapM (canonicalizePath . ("sudokus" </>)) >>=
     filterM (fmap not . doesDirectoryExist)
   sudokus <- mapM readSudoku sudokuFiles
-  putStrLn "Starting..."
+  putStrLn "Starting to solve sudokus..."
+  putStrLn ""
   results <- mapM timeSudoku $ zip sudokus sudokuFiles
-  let solveTotal = sum $ map fst results
-  let slowSolveTotal = sum $ map snd results
-  putStrLn $ "Done! A total of " ++ show solveTotal ++ " s with solve and "
-    ++ show slowSolveTotal ++ "s with slowSolve."
+  let solveResults = map fst results
+  let slowSolveResults = map snd results
+  let solveTotal = sum solveResults
+  let slowSolveTotal = sum slowSolveResults
+  let solveAverage = solveTotal / genericLength solveResults
+  let slowSolveAverage = slowSolveTotal / genericLength slowSolveResults
+  putStrLn $ "Done!"
+  putStrLn $ "Total of solve:" ++ show solveTotal ++ "."
+  putStrLn $ "Total of slowSolve:" ++ show slowSolveTotal ++ "."
+  putStrLn $ "Average of solve:" ++ show solveAverage ++ "."
+  putStrLn $ "Average of slowSolve:" ++ show slowSolveAverage ++ "."
 
 timeSudoku (s,fname) = do
+  let name = (last (splitOn (pack "/") (pack fname)))
+  putStrLn $ "-- Solving "++ show name ++ " --"
   secs <- time $ solve s`seq` return ()
   slowSecs <- time $ slowSolve s`seq` return ()
-  putStrLn $ "Solved "++ show (last (splitOn (pack "/") (pack fname)))++" with solve in "
-    ++ show secs ++ " s and slowSolve in " ++ show slowSecs ++ " s."
+  let s' = solve s
+  putStrLn "Finished with the following result from solve:"
+  case s' of
+    Just sud -> printSudoku sud
+    Nothing  -> putStrLn "(No solution)"
+  putStrLn $ show secs ++ " s with solve."
+  putStrLn $ show slowSecs ++ " s with slowSolve."
+  putStrLn ""
   return (secs, slowSecs)
