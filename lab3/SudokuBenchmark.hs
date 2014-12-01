@@ -8,6 +8,14 @@ import System.CPUTime
 import System.Directory
 import System.FilePath
 
+{-
+
+Quick and dirty tool for benchmarking our two solving algorithms
+
+Please do not consider this code for style points ;)
+
+-}
+
 time a = do
   start <- getCPUTime
   v <- a
