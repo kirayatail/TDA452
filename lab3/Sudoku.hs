@@ -225,7 +225,7 @@ protoSolve pos sud | isSudoku sud && isOkay sud = solve' sud
 readAndSolve :: FilePath -> IO ()
 readAndSolve fp = do
   s <- readSudoku fp
-  let res = solveM s
+  let res = solve s
   case res of
     Just s' -> printSudoku s'
     Nothing -> print "(No solution)"
