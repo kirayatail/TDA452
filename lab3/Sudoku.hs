@@ -146,9 +146,15 @@ update (Sudoku rows) (r,p) v = Sudoku (rows !!= (r,
 prop_UpdatedSudokuIsUpdated :: Sudoku -> Bool
 prop_UpdatedSudokuIsUpdated = undefined
 
--- Returns a list of numbers that are valid candidates at the given position
+-- Returns a list of numbers that are valid candidates at the given position.
+-- Subtract numbers already in the row, col and box from all possible numbers.
 candidates :: Sudoku -> Pos -> [Int]
-candidates s p = [x | x <- [1..9], isOkay (update s p (Just x))]
+candidates s (r,p) = [1..9] \\ takenNums s (r,p)
+  where
+    takenNums s (r,p) = nub $ catMaybes $
+                        (b !! r) ++ (b !! (9+p)) ++
+                        (b !! (18 + (3 * quot r 3) + quot p 3))
+    b = blocks s
 
 -- Property that checks that all candidates are valid for all blanks in
 -- a sudoku.
