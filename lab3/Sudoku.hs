@@ -124,11 +124,10 @@ blanks :: Sudoku -> [Pos]
 blanks (Sudoku rows)= [(r, p) | r <- [0..8], p <- [0..8],
                        isNothing (rows !! r !! p) ]
 
+-- Check that all positions returned by blanks are Nothing
 prop_BlanksIsBlank :: Sudoku -> Bool
 prop_BlanksIsBlank (Sudoku rows) = and [isNothing (rows !! r !! p) |
                                    (r, p) <- blanks (Sudoku rows)]
--- TODO: Möjligen ett redundant test? Proppen kollar inte ifall det finns blanka
--- som inte blanks hittar.
 
 -- Set value from the tuple at position Int in the list, like a_arr[i] = a
 (!!=) :: [a] -> (Int, a) -> [a]
@@ -152,8 +151,23 @@ update :: Sudoku -> Pos -> Maybe Int -> Sudoku
 update (Sudoku rows) (r,p) v = Sudoku (rows !!= (r,
                               (rows !! r) !!= (p, v)))
 
-prop_UpdatedSudokuIsUpdated :: Sudoku -> Bool
-prop_UpdatedSudokuIsUpdated = undefined
+-- Check that the updated sudoku is a sudoku, the update position has
+-- the new value, and all other cells are unmodified.
+prop_UpdatedSudokuIsUpdated :: Sudoku -> Property
+prop_UpdatedSudokuIsUpdated s =
+  forAll (oneof [return (x,y,Just z) | x <- [0..8], y <- [0..8], z <- [1..9]])
+    $ \(r,p,v) ->
+  let
+    (Sudoku rows) = s
+    s' = update s (r,p) v
+    (Sudoku rows') = s'
+  in
+  isSudoku s'
+  && rows' !! r !! p == v
+  && take r rows == take r rows'
+  && drop (r + 1) rows == drop (r + 1) rows'
+  && take p (rows !! r) == take p (rows' !! r)
+  && drop (p + 1) (rows !! r) == drop (p + 1) (rows' !! r)
 
 
 -- Returns a list of numbers that are valid candidates at the given position.
@@ -177,37 +191,24 @@ prop_validCandidates s = isOkay s ==> all validCandidates $ blanks s
 
 -------------------------------------------------------------------------
 
--- Picks out the blank with least candidates together with the candidates
+-- Picks out the blank with least candidates together with the candidates.
 bestPosition :: Sudoku -> (Pos, [Int])
 bestPosition s = minimumBy (compare `on` (length . snd)) [(p, candidates s p) | p <- blanks s]
 
--- Same interface as above, picks the first (stupid) blank
+-- Same interface as above, picks the first (stupid) blank.
 firstPosition :: Sudoku -> (Pos, [Int])
 firstPosition s = (pos, candidates s pos)
   where pos = head (blanks s)
 
--- The actual solving function
-solveM :: Sudoku -> Maybe Sudoku
-solveM sud | isSudoku sud && isOkay sud = solve' sud
-           | otherwise                  = Nothing
-  where
-    solve' :: Sudoku -> Maybe Sudoku
-    solve' s | isSolved s = Just s
-             | otherwise  = solve'' s pos cands
-      where (pos, cands) = bestPosition s
-    solve'' :: Sudoku -> Pos -> [Int] -> Maybe Sudoku
-    solve'' _ _ [] = Nothing
-    solve'' s _ _       | isSolved s     = Just s
-    solve'' s p (c:cs)  | isNothing newS = solve'' s p cs
-                        | otherwise      = newS
-      where newS = solve' $ update s p (Just c)
-
+-- Solve a sudoku with better choice of which blank to start with.
 solve :: Sudoku -> Maybe Sudoku
 solve = protoSolve bestPosition
 
+-- Solver with naïve choice of blanks.
 slowSolve :: Sudoku -> Maybe Sudoku
 slowSolve = protoSolve firstPosition
 
+-- Solving function with plugin provider for blanks and candidates.
 protoSolve :: (Sudoku -> (Pos, [Int])) -> Sudoku -> Maybe Sudoku
 protoSolve pos sud | isSudoku sud && isOkay sud = solve' sud
                    | otherwise                  = Nothing
