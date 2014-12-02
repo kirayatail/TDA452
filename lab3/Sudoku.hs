@@ -119,15 +119,26 @@ isOkay sudo = and [isOkayBlock b | b <- blocks sudo]
 -- Following the standard (row, pos)
 type Pos = (Int, Int)
 
+--
+-- Returns all legal positions in a Sudoku.
+allPositions :: [Pos]
+allPositions = [(r,p) | r <- [0..8], p <- [0..8]]
+
 -- Return a list of positions that are still blank in a sudoku
 blanks :: Sudoku -> [Pos]
-blanks (Sudoku rows)= [(r, p) | r <- [0..8], p <- [0..8],
+blanks (Sudoku rows)= [(r, p) | (r,p) <- allPositions,
                        isNothing (rows !! r !! p) ]
 
 -- Check that all positions returned by blanks are Nothing
+-- and that those not returned are Justs.
 prop_BlanksIsBlank :: Sudoku -> Bool
-prop_BlanksIsBlank (Sudoku rows) = and [isNothing (rows !! r !! p) |
-                                   (r, p) <- blanks (Sudoku rows)]
+prop_BlanksIsBlank s =
+  and [isNothing (rows !! r !! p) | (r, p) <- bs]
+  && and [isJust (rows !! r !! p) | (r, p) <- js]
+  where
+    bs = blanks s
+    js = allPositions \\ bs
+    (Sudoku rows) = s
 
 -- Set value from the tuple at position Int in the list, like a_arr[i] = a
 (!!=) :: [a] -> (Int, a) -> [a]
@@ -213,12 +224,12 @@ protoSolve :: (Sudoku -> (Pos, [Int])) -> Sudoku -> Maybe Sudoku
 protoSolve pos sud | isSudoku sud && isOkay sud = solve' sud
                    | otherwise                  = Nothing
  where
-  solve' s | isSolved s = Just s
-  solve' s              = tryCandidates s $ pos s
+  solve' s | isSolved s && isOkay s = Just s
+  solve' s                          = tryCandidates s $ pos s
   tryCandidates _ (_, []) = Nothing
   tryCandidates s (p, c:cs)
     | isJust s' && isSolved (fromJust s') = s'
-    | otherwise = tryCandidates s (p, cs)
+    | otherwise                           = tryCandidates s (p, cs)
     where s' = solve' (update s p (Just c))
 
 -- Solve Sudoku from file
