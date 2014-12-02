@@ -39,10 +39,10 @@ main = do
   let solveAverage = solveTotal / genericLength solveResults
   let slowSolveAverage = slowSolveTotal / genericLength slowSolveResults
   putStrLn $ "Done!"
-  putStrLn $ "Total of solve:" ++ show solveTotal ++ "."
-  putStrLn $ "Total of slowSolve:" ++ show slowSolveTotal ++ "."
-  putStrLn $ "Average of solve:" ++ show solveAverage ++ "."
-  putStrLn $ "Average of slowSolve:" ++ show slowSolveAverage ++ "."
+  putStrLn $ "Total of solve: " ++ show solveTotal ++ " s."
+  putStrLn $ "Total of slowSolve: " ++ show slowSolveTotal ++ " s."
+  putStrLn $ "Average of solve: " ++ show solveAverage ++ " s."
+  putStrLn $ "Average of slowSolve: " ++ show slowSolveAverage ++ " s."
 
 timeSudoku (s,fname) = do
   let name = (last (splitOn (pack "/") (pack fname)))
