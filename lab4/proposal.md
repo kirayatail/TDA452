@@ -17,8 +17,9 @@ Additional tasks that we may complete:
  * Export and import mazes to/from suitable formats
    (JSON? ASCII? Custom format?)
 
-The algorithm examples are given in
+Definitions and explanations of different algorithms are given in
 [this presentation](http://www.jamisbuck.org/presentations/rubyconf2011).
+It is also an entertaining read.
 
 We're sorry that we missed the deadline,
 we didn't realize it was so soon after the last lab.
