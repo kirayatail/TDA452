@@ -30,16 +30,20 @@ showMaze m = showHorizontal vs hs
     showVertical (v:vs') hs' = concatMap showVerticalWall v ++ "\n" ++ showHorizontal vs' hs'
     showVerticalWall Open = "   "
     showVerticalWall Blocked = "|  "
-    showHorizonalWall Open = "   "
+    showHorizontalWall Open = "   "
     showHorizontalWall Blocked = " ——"
 
 
 emptyMaze, fullMaze :: Int -> Int -> Maze
-emptyMaze = undefined
--- fullMaze x y = Maze {vertical = (replicate x + 1 $ wallList x) horizontal = (replicate y + 1 $ wallList y)}
-fullMaze x y = Maze {vertical = replicate (x + 1) $ wallList y, horizontal = replicate (y + 1) $ wallList x}
+emptyMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
   where
-    wallList n = replicate n Blocked
+    wallList n m =
+      replicate m Blocked :
+      replicate (n - 1) (replicate m Open) ++
+      [replicate m Blocked]
+fullMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
+  where
+    wallList n m = replicate (n + 1) $ replicate m Blocked
 
 addWall, removeWall :: Maze -> Pos -> Direction
 addWall = undefined
