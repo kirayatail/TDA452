@@ -25,22 +25,25 @@ showMaze m = showHorizontal vs hs
     vs = transpose $ verticals m
     hs = horizontals m
     showHorizontal [] []        = []
-    showHorizontal vs' (h:hs') = concatMap showHorizontalWall h ++ "\n" ++showVertical vs' hs'
+    showHorizontal vs' (h:hs') =
+      concatMap showHorizontalWall h
+        ++ "\n" ++ showVertical vs' hs'
     showVertical [] []        = []
-    showVertical (v:vs') hs' = concatMap showVerticalWall v ++ "\n" ++ showHorizontal vs' hs'
+    showVertical (v:vs') hs' =
+      concatMap showVerticalWall v
+        ++ "\n" ++ showHorizontal vs' hs'
     showVerticalWall Open = "   "
     showVerticalWall Blocked = "|  "
     showHorizontalWall Open = "   "
     showHorizontalWall Blocked = " ——"
 
-
 emptyMaze, fullMaze :: Int -> Int -> Maze
 emptyMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
   where
     wallList n m =
-      replicate m Blocked :
-      replicate (n - 1) (replicate m Open) ++
-      [replicate m Blocked]
+      replicate m Blocked
+      : replicate (n - 1) (replicate m Open)
+      ++ [replicate m Blocked]
 fullMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
   where
     wallList n m = replicate (n + 1) $ replicate m Blocked
