@@ -3,6 +3,7 @@
 module MazeLogic where
 
 import Data.List
+import Test.QuickCheck
 
 data Maze = Maze { vertical :: [[Wall]], horizontal :: [[Wall]]}
   deriving ( Show, Eq )
@@ -48,9 +49,38 @@ fullMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
   where
     wallList n m = replicate (n + 1) $ replicate m Blocked
 
-addWall, removeWall :: Maze -> Pos -> Direction
-addWall = undefined
-removeWall = undefined
+-- Set value from the tuple at position Int in the list, like a_arr[i] = a
+(!!=) :: [a] -> (Int, a) -> [a]
+[] !!= _          = []
+(_:es) !!= (0, a) = a:es
+(e:es) !!= (i, a) = e:(es !!= (i-1, a))
+
+-- Check that an updated list has the same lenth, that the value has been
+-- updated and that the rest of the list is unmodified.
+prop_updateList :: NonEmptyList Int -> Int -> Property
+prop_updateList (NonEmpty xs) x =
+  forAll (choose (0, length xs - 1)) $ \i ->
+  let xs' = xs !!= (i,x) in
+  length xs == length xs'
+  && x == xs' !! i
+  && take i xs == take i xs'
+  && drop (i + 1) xs == drop (i + 1) xs'
+
+updateWall :: Maze -> Pos -> Direction -> Wall -> Maze
+updateWall m (x, y) d w
+  | d == U    = Maze {vertical = v, horizontal = update h (y, x) w}
+  | d == D    = Maze {vertical = v, horizontal = update h (y + 1, x) w}
+  | d == L    = Maze {vertical = update v (x, y) w, horizontal = h}
+  | otherwise = Maze {vertical = update v (x + 1, y) w, horizontal = h}
+  where
+    h = horizontals m
+    v = verticals m
+    update xs (n,m) d = xs !!= (n, (xs !! n) !!= (m, d))
+
+
+addWall, removeWall :: Maze -> Pos -> Direction -> Maze
+addWall m p d = updateWall m p d Blocked
+removeWall m p d = updateWall m p d Open
 
 canMove :: Maze -> Pos -> Direction -> Bool
 canMove = undefined
@@ -72,7 +102,7 @@ recursiveBacktracker w h = rb unvisited visited (fullMaze w h)
     rb us (v:vs) m = case mDir of
                         (Just d)  -> rb (us \\ [neighborPos v d])
                                         (neighborPos v d:v:vs)
-                                        m
+                                        (removeWall m v d)
                         Nothing -> rb us vs m
       where
         mDir = pickDirection us v
