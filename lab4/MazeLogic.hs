@@ -10,7 +10,7 @@ data Maze = Maze { vertical :: [[Wall]], horizontal :: [[Wall]]}
 data Wall = Open | Blocked
   deriving ( Show, Eq )
 
-data Direction = Up | Down | Left | Right
+data Direction = U | D | L | R
   deriving ( Show, Eq )
 
 type Pos = (Int,Int)
@@ -60,3 +60,34 @@ positions = undefined
 
 isPerfect :: Maze -> bool
 isPerfect = undefined
+
+recursiveBacktracker :: Int -> Int -> Maze
+recursiveBacktracker w h = rb unvisited visited (fullMaze w h)
+  where
+    startPos  = (0,0)
+    unvisited = unvisitedMaze w h \\ [startPos]
+    visited   = [startPos]
+    rb :: [Pos] -> [Pos] -> Maze -> Maze
+    rb _  []     m = m
+    rb us (v:vs) m = case mDir of
+                        (Just d)  -> rb (us \\ [neighborPos v d])
+                                        (neighborPos v d:v:vs)
+                                        m
+                        Nothing -> rb us vs m
+      where
+        mDir = pickDirection us v
+
+-- Return a 'random' direction that has neighboring position in the list
+pickDirection :: [Pos] -> Pos -> Maybe Direction
+pickDirection u p = case [d | d <- [U,D,L,R], neighborPos p d `elem` u] of
+                         []    -> Nothing
+                         (d:_) -> Just d
+
+neighborPos :: Pos -> Direction -> Pos
+neighborPos (x,y) U = (x, y-1)
+neighborPos (x,y) D = (x, y+1)
+neighborPos (x,y) L = (x-1, y)
+neighborPos (x,y) R = (x+1, y)
+
+unvisitedMaze :: Int -> Int -> [Pos]
+unvisitedMaze w h = [(x,y) | x <-[0..w-1], y <- [0..h-1]]
