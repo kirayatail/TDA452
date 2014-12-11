@@ -2,7 +2,9 @@
 
 module MazeLogic where
 
-data Maze = Maze Int
+data Maze = Maze { vertical :: [[Wall]], horizontal :: [[Wall]]}
+
+data Wall = Open | Blocked
 
 data Direction = Up | Down | Left | Right
 
