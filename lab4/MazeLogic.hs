@@ -7,15 +7,21 @@ import Data.Maybe
 import System.Random
 import Test.QuickCheck
 
+-- A maze is represented with two two dimensional lists representing the walls
+-- that run vertically and horizontally.
 data Maze = Maze { vertical :: [[Wall]], horizontal :: [[Wall]]}
   deriving ( Show, Eq )
 
+-- The space for a wall can either be open or blocked.
 data Wall = Open | Blocked
   deriving ( Show, Eq )
 
+-- The directions in a labyrinth are up, down left and right.
+-- We chose  to go with only one letter since Left and Right are reserved.
 data Direction = U | D | L | R
   deriving ( Show, Eq )
 
+-- A position in a labyrinth can be represented as a tuple.
 type Pos = (Int,Int)
 
 -- Get all walls of a certain orientation.
@@ -118,6 +124,28 @@ possibleDirections m p = [d | d <- [U,D,L,R], canMove m p d]
 possiblePositions :: Maze -> Pos -> [Pos]
 possiblePositions m p = map (neighborPos p) $ possibleDirections m p
 
+directionsInList :: [Pos] -> Pos -> [Direction]
+directionsInList u p = [d | d <- [U,D,L,R], neighborPos p d `elem` u]
+
+neighborsInList :: [Pos] -> Pos -> [Pos]
+neighborsInList u p = map (neighborPos p) $ directionsInList u p
+
+pickElement :: StdGen -> [a] -> (Maybe a, StdGen)
+pickElement g [] = (Nothing, g)
+pickElement g es = (Just (es !! i), g')
+  where
+    (i, g') = randomR (0, length es - 1) g
+
+
+neighborPos :: Pos -> Direction -> Pos
+neighborPos (x,y) U = (x, y-1)
+neighborPos (x,y) D = (x, y+1)
+neighborPos (x,y) L = (x-1, y)
+neighborPos (x,y) R = (x+1, y)
+
+positions :: Maze -> [Pos]
+positions (Maze vs hs) = [(x,y) | x <- [0..(length vs -2)], y <- [0..(length hs -2)]]
+
 -- Checks that a maze is perfect by visiting all nodes and verifying that
 -- there are no loops or unreachable positions.
 isPerfect :: Maze -> Bool
@@ -191,25 +219,3 @@ prims g w h = prim g' unvisited visited frontier (fullMaze w h)
 prop_PrimsIsPerfect :: StdGen -> Int -> Int-> Bool
 prop_PrimsIsPerfect g x y = isPerfect
   $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
-
-directionsInList :: [Pos] -> Pos -> [Direction]
-directionsInList u p = [d | d <- [U,D,L,R], neighborPos p d `elem` u]
-
-neighborsInList :: [Pos] -> Pos -> [Pos]
-neighborsInList u p = map (neighborPos p) $ directionsInList u p
-
-pickElement :: StdGen -> [a] -> (Maybe a, StdGen)
-pickElement g [] = (Nothing, g)
-pickElement g es = (Just (es !! i), g')
-  where
-    (i, g') = randomR (0, length es - 1) g
-
-
-neighborPos :: Pos -> Direction -> Pos
-neighborPos (x,y) U = (x, y-1)
-neighborPos (x,y) D = (x, y+1)
-neighborPos (x,y) L = (x-1, y)
-neighborPos (x,y) R = (x+1, y)
-
-positions :: Maze -> [Pos]
-positions (Maze vs hs) = [(x,y) | x <- [0..(length vs -2)], y <- [0..(length hs -2)]]
