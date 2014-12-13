@@ -55,6 +55,12 @@ fullMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
   where
     wallList n m = replicate (n + 1) $ replicate m Blocked
 
+-- Get the width and height of a maze.
+height, width  :: Maze -> Int
+height (Maze _ h) = length h - 1
+width (Maze v _)  = length v - 1
+
+
 -- Set value from the tuple at position Int in the list, like a_arr[i] = a
 (!!=) :: [a] -> (Int, a) -> [a]
 [] !!= _          = []
