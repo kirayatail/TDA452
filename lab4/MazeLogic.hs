@@ -169,9 +169,18 @@ isOkay m = w > 0
   ve = verticals m
   onlyBlocked = all (== Blocked)
 
--- Checks that a maze is perfect by visiting all nodes and verifying that
--- there are no loops or unreachable positions.
--- Uses a modified Recursive Backtracker to find and visit all positions
+{-
+  A perfect maze is described that any position is reachable from every other
+  position by exactly one route each. Thus, all positions (nodes) should be
+  connected to the same graph, and the graph should have no loops.
+
+  The 'no loops' property is easily verifiable if the other property holds -
+  The number of edges (open wall positions) is exactly one less than the number
+  of nodes.
+
+  The spanning property is a bit harder to determine. We're using a solving
+  algorithm that returns a list of unvisited nodes (which should be empty).
+-}
 isPerfect :: Maze -> Bool
 isPerfect m = hasNoLoops [] (0,0) && allPosReachable
   where
