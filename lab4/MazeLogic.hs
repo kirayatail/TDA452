@@ -150,6 +150,25 @@ neighborPos (x,y) E = (x+1, y)
 positions :: Maze -> [Pos]
 positions (Maze vs hs) = [(x,y) | x <- [0..(length vs -2)], y <- [0..(length hs -2)]]
 
+-- Check that the labyrinth is rectangular and is surrounded by walls.
+isOkay :: Maze -> Bool
+isOkay m = w > 0
+        && h > 0
+        && length ho == (h + 1)
+        && length ve == (w + 1)
+        && all ((== h) . length) ve
+        && all ((== w) . length) ho
+        && onlyBlocked (head ve)
+        && onlyBlocked (head ho)
+        && onlyBlocked (last ve)
+        && onlyBlocked (last ho)
+ where
+  w = width m
+  h = height m
+  ho = horizontals m
+  ve = verticals m
+  onlyBlocked = all (== Blocked)
+
 -- Checks that a maze is perfect by visiting all nodes and verifying that
 -- there are no loops or unreachable positions.
 -- Uses a modified Recursive Backtracker to find and visit all positions
@@ -205,6 +224,11 @@ instance Arbitrary StdGen where
     n <- arbitrary
     return (mkStdGen n)
 
+-- Tests if the recursive backtracker algorithm produces mazes that are valid.
+prop_RBIsOkay :: StdGen ->Int -> Int-> Bool
+prop_RBIsOkay g x y = isPerfect
+  $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
+
 -- Tests if the recursive backtracker algorithm produces perfect mazes.
 prop_RBIsPerfect :: StdGen ->Int -> Int-> Bool
 prop_RBIsPerfect g x y = isPerfect
@@ -231,6 +255,11 @@ prims g w h = prim g' unvisited visited frontier (fullMaze w h)
         d = fromJust mDir
         (mPos, g') = pickElement g fs
         (mDir, g'') = pickElement g' $ directionsInList vs p
+
+-- Tests if Prim's algorithm produces mazes that are valid.
+prop_PrimsIsOkay :: StdGen -> Int -> Int-> Bool
+prop_PrimsIsOkay g x y = isOkay
+  $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
 -- Tests if Prim's algorithm produces perfect mazes.
 prop_PrimsIsPerfect :: StdGen -> Int -> Int-> Bool
