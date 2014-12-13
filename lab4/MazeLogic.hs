@@ -3,6 +3,7 @@
 module MazeLogic where
 
 import Data.List
+import System.Random
 import Test.QuickCheck
 
 data Maze = Maze { vertical :: [[Wall]], horizontal :: [[Wall]]}
@@ -91,27 +92,34 @@ positions = undefined
 isPerfect :: Maze -> bool
 isPerfect = undefined
 
-recursiveBacktracker :: Int -> Int -> Maze
-recursiveBacktracker w h = rb unvisited visited (fullMaze w h)
+recursiveBacktracker :: StdGen -> Int -> Int -> Maze
+recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
   where
-    startPos  = (0,0)
+    (i, g') = randomR (0, (w*h)-1) g
+    startPos  = unvisitedMaze w h !! i
     unvisited = unvisitedMaze w h \\ [startPos]
     visited   = [startPos]
-    rb :: [Pos] -> [Pos] -> Maze -> Maze
-    rb _  []     m = m
-    rb us (v:vs) m = case mDir of
-                        (Just d)  -> rb (us \\ [neighborPos v d])
+    rb :: StdGen -> [Pos] -> [Pos] -> Maze -> Maze
+    rb _ _  []     m = m
+    rb g us (v:vs) m = case mDir of
+                        (Just d)  -> rb g' (us \\ [neighborPos v d])
                                         (neighborPos v d:v:vs)
                                         (removeWall m v d)
-                        Nothing -> rb us vs m
+                        Nothing -> rb g' us vs m
       where
-        mDir = pickDirection us v
+        (mDir, g') = pickDirection g us v
 
 -- Return a 'random' direction that has neighboring position in the list
-pickDirection :: [Pos] -> Pos -> Maybe Direction
-pickDirection u p = case [d | d <- [U,D,L,R], neighborPos p d `elem` u] of
-                         []    -> Nothing
-                         (d:_) -> Just d
+pickDirection :: StdGen -> [Pos] -> Pos -> (Maybe Direction, StdGen)
+pickDirection g u p = pickElement g [d | d <- [U,D,L,R], neighborPos p d `elem` u]
+
+
+pickElement :: StdGen -> [a] -> (Maybe a, StdGen)
+pickElement g [] = (Nothing, g)
+pickElement g es = (Just (es !! i), g')
+  where
+    (i, g') = randomR (0, length es - 1) g
+
 
 neighborPos :: Pos -> Direction -> Pos
 neighborPos (x,y) U = (x, y-1)
