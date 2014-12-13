@@ -18,7 +18,7 @@ data Wall = Open | Blocked
 
 -- The directions in a labyrinth are up, down left and right.
 -- We chose  to go with only one letter since Left and Right are reserved.
-data Direction = U | D | L | R
+data Direction = N | S | W | E
   deriving ( Show, Eq )
 
 -- A position in a labyrinth can be represented as a tuple.
@@ -87,9 +87,9 @@ prop_updateList (NonEmpty xs) x =
 -- Update the type of a wall.
 updateWall :: Maze -> Pos -> Direction -> Wall -> Maze
 updateWall m (x, y) d w
-  | d == U    = Maze {vertical = v, horizontal = update h (y, x) w}
-  | d == D    = Maze {vertical = v, horizontal = update h (y + 1, x) w}
-  | d == L    = Maze {vertical = update v (x, y) w, horizontal = h}
+  | d == N    = Maze {vertical = v, horizontal = update h (y, x) w}
+  | d == S    = Maze {vertical = v, horizontal = update h (y + 1, x) w}
+  | d == W    = Maze {vertical = update v (x, y) w, horizontal = h}
   | otherwise = Maze {vertical = update v (x + 1, y) w, horizontal = h}
   where
     h = horizontals m
@@ -104,9 +104,9 @@ removeWall m p d = updateWall m p d Open
 -- See what type a wall in a direction has.
 wallAt :: Maze -> Pos -> Direction -> Wall
 wallAt m (x, y) d
-  | d == U = (h !! y) !! x
-  | d == D = (h !! (y + 1)) !! x
-  | d == L = (v !! x) !! y
+  | d == N = (h !! y) !! x
+  | d == S = (h !! (y + 1)) !! x
+  | d == W = (v !! x) !! y
   | otherwise = (v !! (x + 1)) !! y
   where
     h = horizontals m
@@ -118,30 +118,34 @@ canMove m p d = Open == wallAt m p d
 
 -- Determine which directions a move is allowed in.
 possibleDirections :: Maze -> Pos -> [Direction]
-possibleDirections m p = [d | d <- [U,D,L,R], canMove m p d]
+possibleDirections m p = [d | d <- [N,S,W,E], canMove m p d]
 
 -- Determine which positions you can move to.
 possiblePositions :: Maze -> Pos -> [Pos]
 possiblePositions m p = map (neighborPos p) $ possibleDirections m p
 
+-- Return all directions in which a given position's neighbors exist
+-- in the provided list.
 directionsInList :: [Pos] -> Pos -> [Direction]
-directionsInList u p = [d | d <- [U,D,L,R], neighborPos p d `elem` u]
+directionsInList u p = [d | d <- [N,S,W,E], neighborPos p d `elem` u]
 
+-- For a given position, return all its neighbors that exist in a provided list
 neighborsInList :: [Pos] -> Pos -> [Pos]
 neighborsInList u p = map (neighborPos p) $ directionsInList u p
 
+-- Returns an arbitrary element from a list, or Nothing if the list is empty.
 pickElement :: StdGen -> [a] -> (Maybe a, StdGen)
 pickElement g [] = (Nothing, g)
 pickElement g es = (Just (es !! i), g')
   where
     (i, g') = randomR (0, length es - 1) g
 
-
+-- Returns the position of a 'neighbor' given a position and a direction
 neighborPos :: Pos -> Direction -> Pos
-neighborPos (x,y) U = (x, y-1)
-neighborPos (x,y) D = (x, y+1)
-neighborPos (x,y) L = (x-1, y)
-neighborPos (x,y) R = (x+1, y)
+neighborPos (x,y) N = (x, y-1)
+neighborPos (x,y) S = (x, y+1)
+neighborPos (x,y) W = (x-1, y)
+neighborPos (x,y) E = (x+1, y)
 
 positions :: Maze -> [Pos]
 positions (Maze vs hs) = [(x,y) | x <- [0..(length vs -2)], y <- [0..(length hs -2)]]
