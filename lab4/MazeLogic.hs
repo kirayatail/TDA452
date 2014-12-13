@@ -200,6 +200,18 @@ isPerfect m = hasNoLoops && allPosReachable
                           rbs (u \\ [neighborPos v $ head ds])
                               (neighborPos v (head ds):v:vs)
 
+{-
+    Recursive Backtracker
+  This algorithm uses two lists for keeping track of positions:
+  Unvisited and Visited. Visited is used like a stack, and keeps track of
+  where to go when a dead end is reached. Unvisited is a pool of positions,
+  among which the generator finds possible ways to go.
+
+  Each iteration, the generator randomly picks the next position from neighbors
+  that are unvisited, moves the new position from Unvisited to Visited and
+  carves through the wall to the new position. If there's no unvisited position
+  nearby, it pops Visited and tries again. It is done when Visited is empty.
+-}
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
   where
