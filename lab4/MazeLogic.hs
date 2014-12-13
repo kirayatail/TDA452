@@ -83,14 +83,37 @@ addWall, removeWall :: Maze -> Pos -> Direction -> Maze
 addWall m p d = updateWall m p d Blocked
 removeWall m p d = updateWall m p d Open
 
+wallAt :: Maze -> Pos -> Direction -> Wall
+wallAt m (x, y) d
+  | d == U    = (v !! y) !! x
+  | d == D    = (v !! (y + 1)) !! x
+  | d == L    = (v !! x) !! y
+  | otherwise = (v !! (x + 1)) !! y
+  where
+    h = horizontals m
+    v = verticals m
+
+
 canMove :: Maze -> Pos -> Direction -> Bool
-canMove = undefined
+canMove m p d = Open == wallAt m p d
 
 positions :: Maze -> [Pos]
 positions = undefined
 
-isPerfect :: Maze -> bool
-isPerfect = undefined
+possibleDirections :: Maze -> Pos -> [Direction]
+possibleDirections m p = [d | d <- [U,D,L,R], canMove m p d]
+
+isPerfect :: Maze -> Bool
+isPerfect m = isPerfect' (0,0) []
+  where
+    isPerfect' p visited
+      | p `elem` visited = False
+      | otherwise        =
+        let
+          newDirections = possibleDirections m p
+            -- /directionBetween p $ take 1 visited
+        in
+        True
 
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
