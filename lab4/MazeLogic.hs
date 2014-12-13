@@ -78,7 +78,6 @@ updateWall m (x, y) d w
     v = verticals m
     update xs (n,m) d = xs !!= (n, (xs !! n) !!= (m, d))
 
-
 addWall, removeWall :: Maze -> Pos -> Direction -> Maze
 addWall m p d = updateWall m p d Blocked
 removeWall m p d = updateWall m p d Open
@@ -104,16 +103,27 @@ possibleDirections :: Maze -> Pos -> [Direction]
 possibleDirections m p = [d | d <- [U,D,L,R], canMove m p d]
 
 isPerfect :: Maze -> Bool
-isPerfect m = isPerfect' (0,0) []
+isPerfect m = hasNoLoops [] (0,0)
   where
-    isPerfect' p visited
+    hasNoLoops :: [Pos] -> Pos -> Bool
+    hasNoLoops [] p =
+      let
+        newDirections = possibleDirections m p
+        newPositions = map (neighborPos p) newDirections
+      in
+      hasNoLoops' [p] newPositions
+    hasNoLoops visited p
       | p `elem` visited = False
       | otherwise        =
         let
           newDirections = possibleDirections m p
-            -- /directionBetween p $ take 1 visited
+          lastPos = head visited
+          filteredPositions = delete lastPos (map (neighborPos p) newDirections)
         in
-        True
+        hasNoLoops' (p : visited) filteredPositions
+    hasNoLoops' :: [Pos] -> [Pos] -> Bool
+    hasNoLoops' visited [] = True
+    hasNoLoops' visited toVisit = all (hasNoLoops visited) toVisit
 
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
