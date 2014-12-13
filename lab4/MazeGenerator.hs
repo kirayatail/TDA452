@@ -6,4 +6,5 @@ import System.Random
 generateRBMaze :: Int -> Int -> IO ()
 generateRBMaze w h = do
   g <- newStdGen
-  putStr $ showMaze $ recursiveBacktracker g w h
+  let l = recursiveBacktracker g w h
+  putStr $ showMaze l
