@@ -182,21 +182,11 @@ isOkay m = w > 0
   algorithm that returns a list of unvisited nodes (which should be empty).
 -}
 isPerfect :: Maze -> Bool
-isPerfect m = hasNoLoops [] (0,0) && allPosReachable
+isPerfect m = hasNoLoops && allPosReachable
   where
-    hasNoLoops :: [Pos] -> Pos -> Bool
-    hasNoLoops visited p
-      | p `elem` visited = False
-      | otherwise        =
-          let toVisit = whereToNext p visited in
-        hasNoLoops' (p : visited) toVisit
-        where
-          hasNoLoops' :: [Pos] -> [Pos] -> Bool
-          hasNoLoops' visited [] = True
-          hasNoLoops' visited toVisit = all (hasNoLoops visited) toVisit
-          whereToNext :: Pos -> [Pos] -> [Pos]
-          whereToNext p [] = possiblePositions m p
-          whereToNext p visited = delete (head visited) $ possiblePositions m p
+    hasNoLoops :: Bool
+    hasNoLoops = length (positions m) - 1 == length (filter (== Open) $
+                 concat (vertical m) ++ concat (horizontal m))
     allPosReachable :: Bool
     allPosReachable = [] == rbs (delete (0,0) $ positions m) [(0,0)]
       where
