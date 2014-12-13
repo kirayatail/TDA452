@@ -226,7 +226,7 @@ instance Arbitrary StdGen where
 
 -- Tests if the recursive backtracker algorithm produces mazes that are valid.
 prop_RBIsOkay :: StdGen ->Int -> Int-> Bool
-prop_RBIsOkay g x y = isPerfect
+prop_RBIsOkay g x y = isOkay
   $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
 -- Tests if the recursive backtracker algorithm produces perfect mazes.
