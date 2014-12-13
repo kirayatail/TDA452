@@ -3,6 +3,7 @@
 module MazeLogic where
 
 import Data.List
+import Data.Maybe
 import System.Random
 import Test.QuickCheck
 
@@ -82,19 +83,8 @@ addWall, removeWall :: Maze -> Pos -> Direction -> Maze
 addWall m p d = updateWall m p d Blocked
 removeWall m p d = updateWall m p d Open
 
-wallAt :: Maze -> Pos -> Direction -> Wall
-wallAt m (x, y) d
-  | d == U    = (v !! y) !! x
-  | d == D    = (v !! (y + 1)) !! x
-  | d == L    = (v !! x) !! y
-  | otherwise = (v !! (x + 1)) !! y
-  where
-    h = horizontals m
-    v = verticals m
-
-
 canMove :: Maze -> Pos -> Direction -> Bool
-canMove m p d = Open == wallAt m p d
+canMove = undefined
 
 positions :: Maze -> [Pos]
 positions = undefined
@@ -127,9 +117,9 @@ isPerfect m = hasNoLoops [] (0,0)
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
   where
-    (i, g') = randomR (0, (w*h)-1) g
-    startPos  = unvisitedMaze w h !! i
-    unvisited = unvisitedMaze w h \\ [startPos]
+    (mStartPos, g') = pickElement g $ unvisitedMaze w h
+    startPos = fromJust mStartPos
+    unvisited      = unvisitedMaze w h \\ [startPos]
     visited   = [startPos]
     rb :: StdGen -> [Pos] -> [Pos] -> Maze -> Maze
     rb _ _  []     m = m
@@ -139,12 +129,35 @@ recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
                                         (removeWall m v d)
                         Nothing -> rb g' us vs m
       where
-        (mDir, g') = pickDirection g us v
+        (mDir, g') = pickElement g $ directionsInList us v
 
--- Return a 'random' direction that has neighboring position in the list
-pickDirection :: StdGen -> [Pos] -> Pos -> (Maybe Direction, StdGen)
-pickDirection g u p = pickElement g [d | d <- [U,D,L,R], neighborPos p d `elem` u]
+prims :: StdGen -> Int -> Int -> Maze
+prims g w h = prim g' unvisited visited frontier (fullMaze w h)
+  where
+    (mStartPos, g') = pickElement g $ unvisitedMaze w h
+    startPos = fromJust mStartPos
+    unvisited = unvisitedMaze w h \\ (startPos:frontier)
+    visited   = [startPos]
+    frontier  = neighborsInList (unvisitedMaze w h) startPos
+    prim :: StdGen -> [Pos] -> [Pos] -> [Pos] -> Maze -> Maze
+    prim _ _  _  [] m = m
+    prim g us vs fs m = let nFront = neighborsInList us p in
+                        prim g'
+                        (us \\ nFront)
+                        (p:vs)
+                        (delete p $ nFront `union` fs)
+                        (removeWall m p d)
+      where
+        p = fromJust mPos
+        d = fromJust mDir
+        (mPos, g') = pickElement g fs
+        (mDir, g'') = pickElement g' $ directionsInList vs p
 
+directionsInList :: [Pos] -> Pos -> [Direction]
+directionsInList u p = [d | d <- [U,D,L,R], neighborPos p d `elem` u]
+
+neighborsInList :: [Pos] -> Pos -> [Pos]
+neighborsInList u p = map (neighborPos p) $ directionsInList u p
 
 pickElement :: StdGen -> [a] -> (Maybe a, StdGen)
 pickElement g [] = (Nothing, g)
