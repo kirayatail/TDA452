@@ -18,10 +18,12 @@ data Direction = U | D | L | R
 
 type Pos = (Int,Int)
 
+-- Get all walls of a certain orientation.
 verticals, horizontals :: Maze -> [[Wall]]
 verticals (Maze v _) = v
 horizontals (Maze _ h) = h
 
+-- Format a maze as an ASCII string.
 showMaze :: Maze -> String
 showMaze m = showHorizontal vs hs
   where
@@ -40,6 +42,8 @@ showMaze m = showHorizontal vs hs
     showHorizontalWall Open = "   "
     showHorizontalWall Blocked = " ——"
 
+-- Generates a maze with no walls respectively only walls.
+-- Note that even an empty maze has walls around it.
 emptyMaze, fullMaze :: Int -> Int -> Maze
 emptyMaze x y = Maze {vertical = wallList x y, horizontal = wallList y x}
   where
@@ -68,6 +72,7 @@ prop_updateList (NonEmpty xs) x =
   && take i xs == take i xs'
   && drop (i + 1) xs == drop (i + 1) xs'
 
+-- Update the type of a wall.
 updateWall :: Maze -> Pos -> Direction -> Wall -> Maze
 updateWall m (x, y) d w
   | d == U    = Maze {vertical = v, horizontal = update h (y, x) w}
@@ -79,19 +84,31 @@ updateWall m (x, y) d w
     v = verticals m
     update xs (n,m) d = xs !!= (n, (xs !! n) !!= (m, d))
 
+-- Shortcut to  updateWall for adding and removing walls.
 addWall, removeWall :: Maze -> Pos -> Direction -> Maze
 addWall m p d = updateWall m p d Blocked
 removeWall m p d = updateWall m p d Open
 
+-- See what type a wall in a direction has.
+wallAt :: Maze -> Pos -> Direction -> Wall
+wallAt m (x, y) d
+  | d == U = (v !! y) !! x
+  | d == D = (v !! (y + 1)) !! x
+  | d == L = (v !! x) !! y
+  | otherwise = (v !! (x + 1)) !! y
+  where
+    h = horizontals m
+    v = verticals m
+
+-- Determine if a move is allowed.
 canMove :: Maze -> Pos -> Direction -> Bool
-canMove = undefined
+canMove m p d = Open == wallAt m p d
 
-positions :: Maze -> [Pos]
-positions = undefined
-
+-- Determine which directions a move is allowed in.
 possibleDirections :: Maze -> Pos -> [Direction]
 possibleDirections m p = [d | d <- [U,D,L,R], canMove m p d]
 
+-- Determine which positions you can move to.
 possiblePositions :: Maze -> Pos -> [Pos]
 possiblePositions m p = map (neighborPos p) $ possibleDirections m p
 
