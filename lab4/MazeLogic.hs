@@ -104,10 +104,10 @@ removeWall m p d = updateWall m p d Open
 -- See what type a wall in a direction has.
 wallAt :: Maze -> Pos -> Direction -> Wall
 wallAt m (x, y) d
-  | d == U = (v !! y) !! x
-  | d == D = (v !! (y + 1)) !! x
-  | d == L = (h !! x) !! y
-  | otherwise = (h !! (x + 1)) !! y
+  | d == U = (h !! y) !! x
+  | d == D = (h !! (y + 1)) !! x
+  | d == L = (v !! x) !! y
+  | otherwise = (v !! (x + 1)) !! y
   where
     h = horizontals m
     v = verticals m
@@ -148,22 +148,35 @@ positions (Maze vs hs) = [(x,y) | x <- [0..(length vs -2)], y <- [0..(length hs 
 
 -- Checks that a maze is perfect by visiting all nodes and verifying that
 -- there are no loops or unreachable positions.
+-- Uses a modified Recursive Backtracker to find and visit all positions
 isPerfect :: Maze -> Bool
-isPerfect m = hasNoLoops [] (0,0)
+isPerfect m = hasNoLoops [] (0,0) && allPosReachable
   where
     hasNoLoops :: [Pos] -> Pos -> Bool
     hasNoLoops visited p
       | p `elem` visited = False
       | otherwise        =
-        let toVisit = whereToNext p visited in
+          let toVisit = whereToNext p visited in
         hasNoLoops' (p : visited) toVisit
-    hasNoLoops' :: [Pos] -> [Pos] -> Bool
-    hasNoLoops' visited [] = True
-    hasNoLoops' visited toVisit = all (hasNoLoops visited) toVisit
-    whereToNext :: Pos -> [Pos] -> [Pos]
-    whereToNext p [] = possiblePositions m p
-    whereToNext p visited = delete (head visited) $ possiblePositions m p
-
+        where
+          hasNoLoops' :: [Pos] -> [Pos] -> Bool
+          hasNoLoops' visited [] = True
+          hasNoLoops' visited toVisit = all (hasNoLoops visited) toVisit
+          whereToNext :: Pos -> [Pos] -> [Pos]
+          whereToNext p [] = possiblePositions m p
+          whereToNext p visited = delete (head visited) $ possiblePositions m p
+    allPosReachable :: Bool
+    allPosReachable = [] == rbs (delete (0,0) $ positions m) [(0,0)]
+      where
+        rbs :: [Pos] -> [Pos] -> [Pos]
+        rbs u [] = u
+        rbs u (v:vs) =
+          let ds = [d | d <- directionsInList u v, canMove m v d] in
+                        if null ds then
+                          rbs u vs
+                        else
+                          rbs (u \\ [neighborPos v $ head ds])
+                              (neighborPos v (head ds):v:vs)
 
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
