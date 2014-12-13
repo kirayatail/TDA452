@@ -100,8 +100,8 @@ wallAt :: Maze -> Pos -> Direction -> Wall
 wallAt m (x, y) d
   | d == U = (v !! y) !! x
   | d == D = (v !! (y + 1)) !! x
-  | d == L = (v !! x) !! y
-  | otherwise = (v !! (x + 1)) !! y
+  | d == L = (h !! x) !! y
+  | otherwise = (h !! (x + 1)) !! y
   where
     h = horizontals m
     v = verticals m
@@ -154,6 +154,17 @@ recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
       where
         (mDir, g') = pickElement g $ directionsInList us v
 
+-- Borrowed from the BlackJack lab.
+instance Arbitrary StdGen where
+  arbitrary = do
+    n <- arbitrary
+    return (mkStdGen n)
+
+-- Tests if the recursive backtracker algorithm produces perfect mazes.
+prop_RBIsPerfect :: StdGen ->Int -> Int-> Bool
+prop_RBIsPerfect g x y = isPerfect
+  $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
+
 prims :: StdGen -> Int -> Int -> Maze
 prims g w h = prim g' unvisited visited frontier (fullMaze w h)
   where
@@ -175,6 +186,11 @@ prims g w h = prim g' unvisited visited frontier (fullMaze w h)
         d = fromJust mDir
         (mPos, g') = pickElement g fs
         (mDir, g'') = pickElement g' $ directionsInList vs p
+
+-- Tests if Prim's algorithm produces perfect mazes.
+prop_PrimsIsPerfect :: StdGen -> Int -> Int-> Bool
+prop_PrimsIsPerfect g x y = isPerfect
+  $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
 directionsInList :: [Pos] -> Pos -> [Direction]
 directionsInList u p = [d | d <- [U,D,L,R], neighborPos p d `elem` u]
