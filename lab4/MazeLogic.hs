@@ -102,28 +102,27 @@ positions = undefined
 possibleDirections :: Maze -> Pos -> [Direction]
 possibleDirections m p = [d | d <- [U,D,L,R], canMove m p d]
 
+possiblePositions :: Maze -> Pos -> [Pos]
+possiblePositions m p = map (neighborPos p) $ possibleDirections m p
+
+-- Checks that a maze is perfect by visiting all nodes and verifying that
+-- there are no loops or unreachable positions.
 isPerfect :: Maze -> Bool
 isPerfect m = hasNoLoops [] (0,0)
   where
     hasNoLoops :: [Pos] -> Pos -> Bool
-    hasNoLoops [] p =
-      let
-        newDirections = possibleDirections m p
-        newPositions = map (neighborPos p) newDirections
-      in
-      hasNoLoops' [p] newPositions
     hasNoLoops visited p
       | p `elem` visited = False
       | otherwise        =
-        let
-          newDirections = possibleDirections m p
-          lastPos = head visited
-          filteredPositions = delete lastPos (map (neighborPos p) newDirections)
-        in
-        hasNoLoops' (p : visited) filteredPositions
+        let toVisit = whereToNext p visited in
+        hasNoLoops' (p : visited) toVisit
     hasNoLoops' :: [Pos] -> [Pos] -> Bool
     hasNoLoops' visited [] = True
     hasNoLoops' visited toVisit = all (hasNoLoops visited) toVisit
+    whereToNext :: Pos -> [Pos] -> [Pos]
+    whereToNext p [] = possiblePositions m p
+    whereToNext p visited = delete (head visited) $ possiblePositions m p
+
 
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
