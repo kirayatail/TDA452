@@ -140,9 +140,9 @@ isPerfect m = hasNoLoops [] (0,0)
 recursiveBacktracker :: StdGen -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
   where
-    (mStartPos, g') = pickElement g $ unvisitedMaze w h
+    (mStartPos, g') = pickElement g $ positions (fullMaze w h)
     startPos = fromJust mStartPos
-    unvisited      = unvisitedMaze w h \\ [startPos]
+    unvisited      = positions (fullMaze w h) \\ [startPos]
     visited   = [startPos]
     rb :: StdGen -> [Pos] -> [Pos] -> Maze -> Maze
     rb _ _  []     m = m
@@ -157,11 +157,11 @@ recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
 prims :: StdGen -> Int -> Int -> Maze
 prims g w h = prim g' unvisited visited frontier (fullMaze w h)
   where
-    (mStartPos, g') = pickElement g $ unvisitedMaze w h
+    (mStartPos, g') = pickElement g $ positions $ fullMaze w h
     startPos = fromJust mStartPos
-    unvisited = unvisitedMaze w h \\ (startPos:frontier)
+    unvisited = positions (fullMaze w h) \\ (startPos:frontier)
     visited   = [startPos]
-    frontier  = neighborsInList (unvisitedMaze w h) startPos
+    frontier  = neighborsInList (positions (fullMaze w h)) startPos
     prim :: StdGen -> [Pos] -> [Pos] -> [Pos] -> Maze -> Maze
     prim _ _  _  [] m = m
     prim g us vs fs m = let nFront = neighborsInList us p in
@@ -195,5 +195,5 @@ neighborPos (x,y) D = (x, y+1)
 neighborPos (x,y) L = (x-1, y)
 neighborPos (x,y) R = (x+1, y)
 
-unvisitedMaze :: Int -> Int -> [Pos]
-unvisitedMaze w h = [(x,y) | x <-[0..w-1], y <- [0..h-1]]
+positions :: Maze -> [Pos]
+positions (Maze vs hs) = [(x,y) | x <- [0..(length vs -2)], y <- [0..(length hs -2)]]
