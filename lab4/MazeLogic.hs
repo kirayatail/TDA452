@@ -2,10 +2,9 @@
 
 module MazeLogic where
 
+import Haste
 import Data.List
 import Data.Maybe
-import System.Random
-import Test.QuickCheck
 
 -- A maze is represented with two two dimensional lists representing the walls
 -- that run vertically and horizontally.
@@ -73,17 +72,6 @@ width (Maze v _)  = length v - 1
 (_:es) !!= (0, a) = a:es
 (e:es) !!= (i, a) = e:(es !!= (i-1, a))
 
--- Check that an updated list has the same lenth, that the value has been
--- updated and that the rest of the list is unmodified.
-prop_updateList :: NonEmptyList Int -> Int -> Property
-prop_updateList (NonEmpty xs) x =
-  forAll (choose (0, length xs - 1)) $ \i ->
-  let xs' = xs !!= (i,x) in
-  length xs == length xs'
-  && x == xs' !! i
-  && take i xs == take i xs'
-  && drop (i + 1) xs == drop (i + 1) xs'
-
 -- Update the type of a wall.
 updateWall :: Maze -> Pos -> Direction -> Wall -> Maze
 updateWall m (x, y) d w
@@ -134,7 +122,7 @@ neighborsInList :: [Pos] -> Pos -> [Pos]
 neighborsInList u p = map (neighborPos p) $ directionsInList u p
 
 -- Returns an arbitrary element from a list, or Nothing if the list is empty.
-pickElement :: StdGen -> [a] -> (Maybe a, StdGen)
+pickElement :: Seed -> [a] -> (Maybe a, Seed)
 pickElement g [] = (Nothing, g)
 pickElement g es = (Just (es !! i), g')
   where
@@ -212,14 +200,14 @@ isPerfect m = hasNoLoops && allPosReachable
   carves through the wall to the new position. If there's no unvisited position
   nearby, it pops Visited and tries again. It is done when Visited is empty.
 -}
-recursiveBacktracker :: StdGen -> Int -> Int -> Maze
+recursiveBacktracker :: Seed -> Int -> Int -> Maze
 recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
   where
     (mStartPos, g') = pickElement g $ positions (fullMaze w h)
     startPos = fromJust mStartPos
     unvisited      = positions (fullMaze w h) \\ [startPos]
     visited   = [startPos]
-    rb :: StdGen -> [Pos] -> [Pos] -> Maze -> Maze
+    rb :: Seed -> [Pos] -> [Pos] -> Maze -> Maze
     rb _ _  []     m = m
     rb g us (v:vs) m = case mDir of
                         (Just d)  -> rb g' (us \\ [neighborPos v d])
@@ -229,23 +217,17 @@ recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
       where
         (mDir, g') = pickElement g $ directionsInList us v
 
--- Borrowed from the BlackJack lab.
-instance Arbitrary StdGen where
-  arbitrary = do
-    n <- arbitrary
-    return (mkStdGen n)
-
 -- Tests if the recursive backtracker algorithm produces mazes that are valid.
-prop_RBIsOkay :: StdGen ->Int -> Int-> Bool
+prop_RBIsOkay :: Seed -> Int -> Int -> Bool
 prop_RBIsOkay g x y = isOkay
   $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
 -- Tests if the recursive backtracker algorithm produces perfect mazes.
-prop_RBIsPerfect :: StdGen ->Int -> Int-> Bool
+prop_RBIsPerfect :: Seed -> Int -> Int -> Bool
 prop_RBIsPerfect g x y = isPerfect
   $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
-prims :: StdGen -> Int -> Int -> Maze
+prims :: Seed -> Int -> Int -> Maze
 prims g w h = prim g' unvisited visited frontier (fullMaze w h)
   where
     (mStartPos, g') = pickElement g $ positions $ fullMaze w h
@@ -253,7 +235,7 @@ prims g w h = prim g' unvisited visited frontier (fullMaze w h)
     unvisited = positions (fullMaze w h) \\ (startPos:frontier)
     visited   = [startPos]
     frontier  = neighborsInList (positions (fullMaze w h)) startPos
-    prim :: StdGen -> [Pos] -> [Pos] -> [Pos] -> Maze -> Maze
+    prim :: Seed -> [Pos] -> [Pos] -> [Pos] -> Maze -> Maze
     prim _ _  _  [] m = m
     prim g us vs fs m = let nFront = neighborsInList us p in
                         prim g'
@@ -268,11 +250,11 @@ prims g w h = prim g' unvisited visited frontier (fullMaze w h)
         (mDir, g'') = pickElement g' $ directionsInList vs p
 
 -- Tests if Prim's algorithm produces mazes that are valid.
-prop_PrimsIsOkay :: StdGen -> Int -> Int-> Bool
+prop_PrimsIsOkay :: Seed -> Int -> Int-> Bool
 prop_PrimsIsOkay g x y = isOkay
   $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
 -- Tests if Prim's algorithm produces perfect mazes.
-prop_PrimsIsPerfect :: StdGen -> Int -> Int-> Bool
+prop_PrimsIsPerfect :: Seed -> Int -> Int-> Bool
 prop_PrimsIsPerfect g x y = isPerfect
   $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
