@@ -227,6 +227,18 @@ prop_RBIsPerfect :: Seed -> Int -> Int -> Bool
 prop_RBIsPerfect g x y = isPerfect
   $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
 
+{-
+    Prim's Algorithm
+  This algorithm is quite similar to Recursive Backtracker, but produces mazes
+  with some distinct differences. In addition to the two working lists, Prim's
+  uses a 'Frontier' list with all cells neighboring the visited cells (like a
+  barrier between visited and unvisited).
+
+  Each iteration, a cell is chosen at random from the frontier and eventually
+  moved to the visited list. Any neighbors to the cell in the unvisited list are
+  moved to the frontier. Finally, a path is carved from the cell to a randomly
+  chosen neighbor in the visited list.
+-}
 prims :: Seed -> Int -> Int -> Maze
 prims g w h = prim g' unvisited visited frontier (fullMaze w h)
   where
