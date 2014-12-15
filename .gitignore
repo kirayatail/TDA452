@@ -12,3 +12,7 @@ cabal.config
 
 # Mac specific
 .DS_Store
+
+*.js
+*.html
+*.jsmod
