@@ -11,14 +11,45 @@ newCanvas w h = do
   setStyle canvas "border" "1px solid black"
   setStyle canvas "display" "block"
   setStyle canvas "margin" "auto"
-  setStyle canvas "background-color" "pink"
   setProp canvas "width" (show w)
   setProp canvas "height" (show h)
   return canvas
 
+-- Create textfield
+newTextField :: String -> IO Elem
+newTextField ident = do
+  input <- newElem "input"
+  setProp input "type" "text"
+  setProp input "id" ident
+  setProp input "name" ident
+  setProp input "placeholder" ident
+  return input
+
+submitButton :: IO Elem
+submitButton = do
+  btn <- newElem "button"
+  setProp btn "id" "submitButton"
+  setProp btn "name" "submitButton"
+  text <- newTextElem "Generate Maze"
+  setChildren btn [text]
+  return btn
+
+settingsDiv :: IO Elem
+settingsDiv = do
+  d <- newElem "div"
+  setStyle d "margin" "auto"
+  setStyle d "width" $ show 500 ++"px"
+  setStyle d "margin-bottom" "1em"
+  return d
+
 main = do
   canvasElem <- newCanvas width height
+  sDivElem <- settingsDiv
+  xInputElem <- newTextField "width"
+  yInputElem <- newTextField "height"
+  btn <- submitButton
+  setChildren sDivElem [xInputElem, yInputElem, btn]
   Just canvas <- getCanvas canvasElem
   setProp canvasElem "height" (show 250)
-  setChildren documentBody [canvasElem]
+  setChildren documentBody [sDivElem, canvasElem]
   return ()
