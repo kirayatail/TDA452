@@ -1,9 +1,7 @@
 import Haste
 import Haste.Graphics.Canvas
 import MazeLogic
-
-height = 500
-width = 500
+import Data.List
 
 -- Create a canvas to draw on.
 newCanvas :: Double -> Double -> IO Elem
@@ -24,16 +22,32 @@ newTextField ident = do
   setProp input "id" ident
   setProp input "name" ident
   setProp input "placeholder" ident
+  setStyle input "width" "6em"
+  setStyle input "margin-right" "1em"
   return input
 
-submitButton :: IO Elem
-submitButton = do
+newSubmitButton :: IO Elem
+newSubmitButton = do
   btn <- newElem "button"
   setProp btn "id" "submitButton"
   setProp btn "name" "submitButton"
   text <- newTextElem "Generate Maze"
   setChildren btn [text]
   return btn
+
+newAlgoSelector :: IO Elem
+newAlgoSelector = do
+  sel <- newElem "select"
+  rb <- newElem "option"
+  prim <- newElem "option"
+  setProp rb "value" "rb"
+  setProp prim "value" "prim"
+  text <- newTextElem "Recursive Backtracker"
+  setChildren rb [text]
+  text <- newTextElem "Prim's algorithm"
+  setChildren prim [text]
+  setChildren sel [rb, prim]
+  return sel
 
 settingsDiv :: IO Elem
 settingsDiv = do
@@ -44,23 +58,60 @@ settingsDiv = do
   return d
 
 main = do
-  canvasElem <- newCanvas width height
+  canvasElem <- newCanvas 500.0 500.0
   sDivElem <- settingsDiv
   xInputElem <- newTextField "width"
   yInputElem <- newTextField "height"
-  btn <- submitButton
-  setChildren sDivElem [xInputElem, yInputElem, btn]
+  btn <- newSubmitButton
+  sel <- newAlgoSelector
+  setChildren sDivElem [xInputElem, yInputElem, sel, btn]
   Just canvas <- getCanvas canvasElem
-  setProp canvasElem "height" (show 250)
   setChildren documentBody [sDivElem, canvasElem]
-  onEvent btn OnClick $ generateLabyrinth canvas xInputElem yInputElem
+  onEvent btn OnClick $ \_ -> generateLabyrinth canvas canvasElem xInputElem yInputElem sel
   return ()
 
-generateLabyrinth canvas xElem yElem = do
+wall :: Bool -> Pos -> Picture ()
+wall vert (x',y') = color (RGB 0 0 0) $
+                    stroke $ if vert then
+                              line (x*20, y*20) (x*20, (y+1)*20)
+                            else
+                              line (x*20, y*20) ((x+1)*20, y*20)
+    where
+      x = fromIntegral x'
+      y = fromIntegral y'
+
+wallPositions :: [[Wall]] -> [Pos]
+wallPositions rows = [(x,y) | x <- [0.. length rows - 1], y <- [0.. length (rows !! x) -1], rows !! x !! y == Blocked]
+
+
+-- | Render the game's state to a canvas.
+renderLabyrinth :: Canvas -> Maze -> IO ()
+renderLabyrinth can m =
+  let hs = wallPositions $ transpose $ horizontals m in
+  let vs = wallPositions $ verticals m in
+  render can $ do
+    sequence_ $ fmap (wall True) vs
+    sequence_ $ fmap (wall False) hs
+    wall True (0,0)
+
+
+generateLabyrinth :: Canvas -> Elem -> Elem -> Elem -> Elem -> (Int, Int) ->IO ()
+generateLabyrinth canvas cElem xElem yElem fElem _ = do
   mx <- getValue xElem
   my <- getValue yElem
-  g <- newStdGen
-  case (mx, my) of
-    (Just x, Just y) -> return emptyMaze x y
-    _                -> return ()
+  mf <- getValue fElem
+  g <- newSeed
+
+
+  let (x,y) = case (mx, my) of
+            (Just x, Just y) -> (x,y)
+            _                -> (6,6)
+  let f = case mf of
+          Just "prim" -> prims g
+          Just "rb"   -> recursiveBacktracker g
+          _           -> emptyMaze
+  let m = f x y
+  setProp cElem "height" $ show (20 * y)
+  setProp cElem "width" $ show (20 * x)
+  renderLabyrinth canvas m
   return ()
