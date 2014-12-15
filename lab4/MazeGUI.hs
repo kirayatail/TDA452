@@ -1,5 +1,6 @@
 import Haste
 import Haste.Graphics.Canvas
+import MazeLogic
 
 height = 500
 width = 500
@@ -52,4 +53,14 @@ main = do
   Just canvas <- getCanvas canvasElem
   setProp canvasElem "height" (show 250)
   setChildren documentBody [sDivElem, canvasElem]
+  onEvent btn OnClick $ generateLabyrinth canvas xInputElem yInputElem
+  return ()
+
+generateLabyrinth canvas xElem yElem = do
+  mx <- getValue xElem
+  my <- getValue yElem
+  g <- newStdGen
+  case (mx, my) of
+    (Just x, Just y) -> return emptyMaze x y
+    _                -> return ()
   return ()
