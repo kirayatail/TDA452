@@ -218,14 +218,18 @@ recursiveBacktracker g w h = rb g' unvisited visited (fullMaze w h)
         (mDir, g') = pickElement g $ directionsInList us v
 
 -- Tests if the recursive backtracker algorithm produces mazes that are valid.
-prop_RBIsOkay :: Seed -> Int -> Int -> Bool
-prop_RBIsOkay g x y = isOkay
+prop_RBIsOkay :: Int -> Int -> Int -> Bool
+prop_RBIsOkay g' x y = isOkay
   $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
+  where
+    g = mkSeed g'
 
 -- Tests if the recursive backtracker algorithm produces perfect mazes.
-prop_RBIsPerfect :: Seed -> Int -> Int -> Bool
-prop_RBIsPerfect g x y = isPerfect
+prop_RBIsPerfect :: Int -> Int -> Int -> Bool
+prop_RBIsPerfect g' x y = isPerfect
   $ recursiveBacktracker g (1 + (x `mod` 50)) (1 + (y `mod` 50))
+  where
+    g = mkSeed g'
 
 {-
     Prim's Algorithm
@@ -262,11 +266,15 @@ prims g w h = prim g' unvisited visited frontier (fullMaze w h)
         (mDir, g'') = pickElement g' $ directionsInList vs p
 
 -- Tests if Prim's algorithm produces mazes that are valid.
-prop_PrimsIsOkay :: Seed -> Int -> Int-> Bool
-prop_PrimsIsOkay g x y = isOkay
+prop_PrimsIsOkay :: Int -> Int -> Int-> Bool
+prop_PrimsIsOkay g' x y = isOkay
   $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
+  where
+    g = mkSeed g'
 
 -- Tests if Prim's algorithm produces perfect mazes.
-prop_PrimsIsPerfect :: Seed -> Int -> Int-> Bool
-prop_PrimsIsPerfect g x y = isPerfect
+prop_PrimsIsPerfect :: Int -> Int -> Int-> Bool
+prop_PrimsIsPerfect g' x y = isPerfect
   $ prims g (1 + (x `mod` 50)) (1 + (y `mod` 50))
+  where
+    g = mkSeed g'
